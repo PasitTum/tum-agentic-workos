@@ -5,3 +5,4 @@ export * from './ebpf-guardrail.service.js';
 export * from './sap-salesforce-adapter.service.js';
 export * from './merge-arbitrator.service.js';
 export * from './workflow-orchestrator.service.js';
+export * from './general-ledger-sync.service.js';
