@@ -10,3 +10,6 @@ export * from './treasury/index.js';
 export * from './etax/index.js';
 export * from './vendor-risk/index.js';
 export * from './consensus/index.js';
+export * from './payroll/index.js';
+export * from './fx-hedging/index.js';
+export * from './agent-roi/index.js';
