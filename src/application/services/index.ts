@@ -6,3 +6,8 @@ export * from './sap-salesforce-adapter.service.js';
 export * from './merge-arbitrator.service.js';
 export * from './workflow-orchestrator.service.js';
 export * from './general-ledger-sync.service.js';
+export * from './cash-flow-forecaster.service.js';
+export * from './agent-containment-listener.service.js';
+export * from './etax.service.js';
+export * from './vendor-risk.service.js';
+export * from './byzantine-consensus.service.js';

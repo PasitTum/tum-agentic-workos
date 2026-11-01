@@ -11,6 +11,9 @@ import { SapSalesforceAdapterService } from '../../application/services/sap-sale
 import { MergeArbitratorService } from '../../application/services/merge-arbitrator.service.js';
 import { WorkflowOrchestratorService } from '../../application/services/workflow-orchestrator.service.js';
 import { GeneralLedgerSyncService } from '../../application/services/general-ledger-sync.service.js';
+import { ETaxService } from '../../application/services/etax.service.js';
+import { VendorRiskService } from '../../application/services/vendor-risk.service.js';
+import { ByzantineConsensusService } from '../../application/services/byzantine-consensus.service.js';
 import { SovereignTelemetryBus } from '../../infrastructure/telemetry/sovereign-telemetry.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -25,6 +28,9 @@ export class ApiServer {
   private mergeService = new MergeArbitratorService();
   private workflowService = new WorkflowOrchestratorService();
   private accountingService = new GeneralLedgerSyncService();
+  private eTaxService = new ETaxService();
+  private vendorRiskService = new VendorRiskService();
+  private consensusService = new ByzantineConsensusService();
 
   private server = createServer(async (req, res) => {
     try {
@@ -230,6 +236,49 @@ export class ApiServer {
 
     if (path === '/api/v1/accounting/vouchers' && method === 'GET') {
       return this.sendJson(res, 200, { vouchers: this.accountingService.getAllVouchers() });
+    }
+
+    // e-Tax Invoice & e-Receipt API (WOS-EPIC-07)
+    if (path === '/api/v1/etax/invoices' && method === 'POST') {
+      const body = await this.parseJsonBody(req);
+      const invoice = this.eTaxService.generateAndSealInvoice(body as any);
+      return this.sendJson(res, 201, { invoice });
+    }
+
+    if (path.startsWith('/api/v1/etax/invoices/') && method === 'GET') {
+      const invNum = decodeURIComponent(path.replace('/api/v1/etax/invoices/', ''));
+      const invoice = this.eTaxService.getInvoice(invNum);
+      if (!invoice) {
+        return this.sendJson(res, 404, { error: 'NOT_FOUND', message: `e-Tax Invoice '${invNum}' not found.` });
+      }
+      return this.sendJson(res, 200, { invoice });
+    }
+
+    // Vendor Risk & KYC API (WOS-EPIC-08)
+    if (path === '/api/v1/vendor-risk/evaluate' && method === 'POST') {
+      const body = await this.parseJsonBody(req);
+      const evaluation = this.vendorRiskService.registerAndEvaluateVendor(body as any);
+      return this.sendJson(res, 200, { evaluation });
+    }
+
+    // Byzantine Swarm Consensus API (WOS-EPIC-09)
+    if (path === '/api/v1/consensus/proposals' && method === 'POST') {
+      const body = await this.parseJsonBody(req);
+      const proposal = this.consensusService.createProposal(body as any);
+      return this.sendJson(res, 201, { proposal });
+    }
+
+    if (path === '/api/v1/consensus/ballots' && method === 'POST') {
+      const body = await this.parseJsonBody(req) as any;
+      const result = this.consensusService.castBallot(
+        body.proposalId,
+        body.agentId,
+        body.agentRole,
+        body.decision,
+        body.justification,
+        body.signature
+      );
+      return this.sendJson(res, 200, { result });
     }
 
     // 404 Route Not Found
