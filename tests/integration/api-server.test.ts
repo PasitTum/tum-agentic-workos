@@ -159,4 +159,57 @@ describe('ApiServer & E2E WorkOS Workflows', () => {
     const verifyData = await verifyRes.json() as { verification: { isValid: boolean } };
     assert.strictEqual(verifyData.verification.isValid, true);
   });
+
+  test('Executes Workflow DAG via API', async () => {
+    const wfRes = await fetch(`${baseUrl}/api/v1/workflow/execute`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        workflowId: 'wf-api-test-01',
+        title: 'API Automated Verification Flow',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        tasks: [
+          {
+            taskId: 't1',
+            name: 'Initialize Context',
+            assignedRole: 'General Agent',
+            dependencies: [],
+            status: 'PENDING',
+            requiresHumanApproval: false,
+            actionPayload: { init: true }
+          }
+        ]
+      })
+    });
+    assert.strictEqual(wfRes.status, 200);
+    const wfData = await wfRes.json() as { receipt: { status: string; executedTaskCount: number } };
+    assert.strictEqual(wfData.receipt.status, 'COMPLETED');
+    assert.strictEqual(wfData.receipt.executedTaskCount, 1);
+  });
+
+  test('Posts General Ledger Journal Voucher via API', async () => {
+    const postRes = await fetch(`${baseUrl}/api/v1/accounting/post`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        invoiceId: 'INV-API-9901',
+        purchaseOrderId: 'PO-API-01',
+        vendorId: 'VEN-01',
+        vendorName: 'Supermicro Thailand',
+        baseAmountThb: 10000.0,
+        vatRatePercent: 7.0,
+        whtRatePercent: 0.0,
+        description: 'Server Rack Rails Acquisition'
+      })
+    });
+    assert.strictEqual(postRes.status, 201);
+    const postData = await postRes.json() as { voucher: { voucherId: string; totalDebitThb: number } };
+    assert.strictEqual(postData.voucher.totalDebitThb, 10700.0);
+
+    const listRes = await fetch(`${baseUrl}/api/v1/accounting/vouchers`);
+    assert.strictEqual(listRes.status, 200);
+    const listData = await listRes.json() as { vouchers: any[] };
+    assert.ok(listData.vouchers.length >= 1);
+  });
 });

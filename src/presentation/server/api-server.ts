@@ -9,6 +9,8 @@ import { DacMintingService } from '../../application/services/dac-minting.servic
 import { EbpfGuardrailService } from '../../application/services/ebpf-guardrail.service.js';
 import { SapSalesforceAdapterService } from '../../application/services/sap-salesforce-adapter.service.js';
 import { MergeArbitratorService } from '../../application/services/merge-arbitrator.service.js';
+import { WorkflowOrchestratorService } from '../../application/services/workflow-orchestrator.service.js';
+import { GeneralLedgerSyncService } from '../../application/services/general-ledger-sync.service.js';
 import { SovereignTelemetryBus } from '../../infrastructure/telemetry/sovereign-telemetry.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -21,6 +23,8 @@ export class ApiServer {
   private guardrailService = new EbpfGuardrailService();
   private legacyService = new SapSalesforceAdapterService();
   private mergeService = new MergeArbitratorService();
+  private workflowService = new WorkflowOrchestratorService();
+  private accountingService = new GeneralLedgerSyncService();
 
   private server = createServer(async (req, res) => {
     try {
@@ -208,6 +212,24 @@ export class ApiServer {
     // Telemetry Events
     if (path === '/api/v1/telemetry/events' && method === 'GET') {
       return this.sendJson(res, 200, { events: SovereignTelemetryBus.getRecentEvents() });
+    }
+
+    // Workflow Orchestrator API
+    if (path === '/api/v1/workflow/execute' && method === 'POST') {
+      const body = await this.parseJsonBody(req);
+      const receipt = await this.workflowService.executeWorkflow(body as any);
+      return this.sendJson(res, 200, { receipt });
+    }
+
+    // General Ledger & Accounting API
+    if (path === '/api/v1/accounting/post' && method === 'POST') {
+      const body = await this.parseJsonBody(req);
+      const voucher = this.accountingService.postProcurementVoucher(body as any);
+      return this.sendJson(res, 201, { voucher });
+    }
+
+    if (path === '/api/v1/accounting/vouchers' && method === 'GET') {
+      return this.sendJson(res, 200, { vouchers: this.accountingService.getAllVouchers() });
     }
 
     // 404 Route Not Found
