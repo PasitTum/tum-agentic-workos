@@ -256,7 +256,7 @@ export class ApiServer {
 }
 
 // Direct execution mode
-if (process.argv[1] && process.argv[1].endsWith('api-server.ts')) {
+if (process.argv[1] && (process.argv[1].endsWith('api-server.ts') || process.argv[1].endsWith('api-server.js'))) {
   const port = Number(process.env.PORT) || 8080;
   const server = new ApiServer();
   server.listen(port).then(p => {
