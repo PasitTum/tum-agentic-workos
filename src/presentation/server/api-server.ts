@@ -14,6 +14,9 @@ import { GeneralLedgerSyncService } from '../../application/services/general-led
 import { ETaxService } from '../../application/services/etax.service.js';
 import { VendorRiskService } from '../../application/services/vendor-risk.service.js';
 import { ByzantineConsensusService } from '../../application/services/byzantine-consensus.service.js';
+import { PayrollService } from '../../application/services/payroll.service.js';
+import { FxHedgingService } from '../../application/services/fx-hedging.service.js';
+import { AgentRoiService } from '../../application/services/agent-roi.service.js';
 import { SovereignTelemetryBus } from '../../infrastructure/telemetry/sovereign-telemetry.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -31,6 +34,9 @@ export class ApiServer {
   private eTaxService = new ETaxService();
   private vendorRiskService = new VendorRiskService();
   private consensusService = new ByzantineConsensusService();
+  private payrollService = new PayrollService();
+  private fxService = new FxHedgingService();
+  private roiService = new AgentRoiService();
 
   private server = createServer(async (req, res) => {
     try {
@@ -177,6 +183,57 @@ export class ApiServer {
       return this.sendJson(res, 200, { result });
     }
 
+    // Payroll & PND1 API (WOS-EPIC-10)
+    if (path === '/api/v1/payroll/profile' && method === 'POST') {
+      const body = await this.parseJsonBody(req) as any;
+      this.payrollService.registerPayrollProfile(body);
+      return this.sendJson(res, 201, { message: 'Profile registered' });
+    }
+
+    if (path === '/api/v1/payroll/payslip' && method === 'POST') {
+      const body = await this.parseJsonBody(req) as any;
+      const payslip = this.payrollService.generateMonthlyPayslip(body.employeeId, body.year, body.month);
+      return this.sendJson(res, 201, { payslip });
+    }
+
+    if (path === '/api/v1/payroll/pnd1' && method === 'POST') {
+      const body = await this.parseJsonBody(req) as any;
+      const filing = this.payrollService.generatePnd1MonthlyFiling(body.year, body.month, body.employerTaxId, body.branch);
+      return this.sendJson(res, 201, { filing });
+    }
+
+    // FX Hedging API (WOS-EPIC-11)
+    if (path === '/api/v1/fx/exposure' && method === 'POST') {
+      const body = await this.parseJsonBody(req) as any;
+      const exposure = this.fxService.recordForeignExposure(body.poNumber, body.vendorId, body.currency, body.amount, body.dueDate);
+      return this.sendJson(res, 201, { exposure });
+    }
+
+    if (path === '/api/v1/fx/hedge' && method === 'POST') {
+      const body = await this.parseJsonBody(req) as any;
+      const contract = this.fxService.executeForwardHedge(body.exposureId, body.counterpartyBank, body.daysToMaturity);
+      return this.sendJson(res, 201, { contract });
+    }
+
+    // Agent ROI & Token Ledger API (WOS-EPIC-12)
+    if (path === '/api/v1/agent-roi/token' && method === 'POST') {
+      const body = await this.parseJsonBody(req) as any;
+      const event = this.roiService.logTokenUsage(body.agentId, body.taskId, body.modelEngine, body.inputTokens, body.outputTokens);
+      return this.sendJson(res, 201, { event });
+    }
+
+    if (path === '/api/v1/agent-roi/value' && method === 'POST') {
+      const body = await this.parseJsonBody(req) as any;
+      const event = this.roiService.logBusinessValue(body.agentId, body.taskId, body.category, body.valueTHB, body.evidenceRef);
+      return this.sendJson(res, 201, { event });
+    }
+
+    if (path.startsWith('/api/v1/agent-roi/scorecard/') && method === 'GET') {
+      const agentId = decodeURIComponent(path.replace('/api/v1/agent-roi/scorecard/', ''));
+      const scorecard = this.roiService.getAgentRoiScorecard(agentId);
+      return this.sendJson(res, 200, { scorecard });
+    }
+
     // Quantum Credential (DAC) APIs
     if (path === '/api/v1/credentials/mint' && method === 'POST') {
       const body = await this.parseJsonBody(req);
@@ -279,6 +336,57 @@ export class ApiServer {
         body.signature
       );
       return this.sendJson(res, 200, { result });
+    }
+
+    // Payroll & PND1 API (WOS-EPIC-10)
+    if (path === '/api/v1/payroll/profile' && method === 'POST') {
+      const body = await this.parseJsonBody(req) as any;
+      this.payrollService.registerPayrollProfile(body);
+      return this.sendJson(res, 201, { message: 'Profile registered' });
+    }
+
+    if (path === '/api/v1/payroll/payslip' && method === 'POST') {
+      const body = await this.parseJsonBody(req) as any;
+      const payslip = this.payrollService.generateMonthlyPayslip(body.employeeId, body.year, body.month);
+      return this.sendJson(res, 201, { payslip });
+    }
+
+    if (path === '/api/v1/payroll/pnd1' && method === 'POST') {
+      const body = await this.parseJsonBody(req) as any;
+      const filing = this.payrollService.generatePnd1MonthlyFiling(body.year, body.month, body.employerTaxId, body.branch);
+      return this.sendJson(res, 201, { filing });
+    }
+
+    // FX Hedging API (WOS-EPIC-11)
+    if (path === '/api/v1/fx/exposure' && method === 'POST') {
+      const body = await this.parseJsonBody(req) as any;
+      const exposure = this.fxService.recordForeignExposure(body.poNumber, body.vendorId, body.currency, body.amount, body.dueDate);
+      return this.sendJson(res, 201, { exposure });
+    }
+
+    if (path === '/api/v1/fx/hedge' && method === 'POST') {
+      const body = await this.parseJsonBody(req) as any;
+      const contract = this.fxService.executeForwardHedge(body.exposureId, body.counterpartyBank, body.daysToMaturity);
+      return this.sendJson(res, 201, { contract });
+    }
+
+    // Agent ROI & Token Ledger API (WOS-EPIC-12)
+    if (path === '/api/v1/agent-roi/token' && method === 'POST') {
+      const body = await this.parseJsonBody(req) as any;
+      const event = this.roiService.logTokenUsage(body.agentId, body.taskId, body.modelEngine, body.inputTokens, body.outputTokens);
+      return this.sendJson(res, 201, { event });
+    }
+
+    if (path === '/api/v1/agent-roi/value' && method === 'POST') {
+      const body = await this.parseJsonBody(req) as any;
+      const event = this.roiService.logBusinessValue(body.agentId, body.taskId, body.category, body.valueTHB, body.evidenceRef);
+      return this.sendJson(res, 201, { event });
+    }
+
+    if (path.startsWith('/api/v1/agent-roi/scorecard/') && method === 'GET') {
+      const agentId = decodeURIComponent(path.replace('/api/v1/agent-roi/scorecard/', ''));
+      const scorecard = this.roiService.getAgentRoiScorecard(agentId);
+      return this.sendJson(res, 200, { scorecard });
     }
 
     // 404 Route Not Found

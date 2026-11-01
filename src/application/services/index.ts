@@ -11,3 +11,6 @@ export * from './agent-containment-listener.service.js';
 export * from './etax.service.js';
 export * from './vendor-risk.service.js';
 export * from './byzantine-consensus.service.js';
+export * from './payroll.service.js';
+export * from './fx-hedging.service.js';
+export * from './agent-roi.service.js';
