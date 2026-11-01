@@ -1,4 +1,4 @@
-export type TaskExecutionStatus = 'PENDING' | 'RUNNING' | 'COMPLETED' | 'FAILED' | 'BLOCKED_HUMAN_APPROVAL';
+export type TaskExecutionStatus = 'PENDING' | 'RUNNING' | 'COMPLETED' | 'FAILED' | 'BLOCKED_HUMAN_APPROVAL' | 'ROLLED_BACK';
 
 export interface WorkflowTaskNode {
   taskId: string;
@@ -11,6 +11,7 @@ export interface WorkflowTaskNode {
   actionPayload: Record<string, unknown>;
   outputResult?: Record<string, unknown>;
   executionError?: string;
+  compensationPayload?: Record<string, unknown>;
 }
 
 export interface WorkflowDagPlan {
@@ -20,3 +21,26 @@ export interface WorkflowDagPlan {
   createdAt: string;
   updatedAt: string;
 }
+
+export type WorkflowExecutionState = 'IDLE' | 'IN_PROGRESS' | 'WAITING_HUMAN' | 'COMPLETED' | 'FAILED' | 'ROLLED_BACK';
+
+export interface WorkflowExecutionReceipt {
+  workflowId: string;
+  planTitle: string;
+  status: WorkflowExecutionState;
+  executedTaskCount: number;
+  completedTasks: string[];
+  failedTaskId?: string;
+  executionLog: Array<{
+    taskId: string;
+    role: string;
+    status: TaskExecutionStatus;
+    timestamp: string;
+    details?: string;
+  }>;
+  quantumVerificationHash: string;
+  timestamp: string;
+}
+
+export type TaskHandler = (task: WorkflowTaskNode, context: Record<string, unknown>) => Promise<Record<string, unknown>>;
+

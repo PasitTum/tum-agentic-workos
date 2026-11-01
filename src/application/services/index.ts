@@ -4,3 +4,4 @@ export * from './dac-minting.service.js';
 export * from './ebpf-guardrail.service.js';
 export * from './sap-salesforce-adapter.service.js';
 export * from './merge-arbitrator.service.js';
+export * from './workflow-orchestrator.service.js';
