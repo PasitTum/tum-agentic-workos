@@ -1,0 +1,43 @@
+{
+  "name": "@tum/agentic-workos",
+  "version": "1.0.0",
+  "description": "TUM Agentic WorkOS — Autonomous AI Enterprise Operating System & Process ERP",
+  "type": "module",
+  "main": "dist/presentation/server/api-server.js",
+  "bin": {
+    "workos": "bin/workos.js",
+    "tum-workos": "bin/workos.js"
+  },
+  "scripts": {
+    "build": "tsc && node -e \"const fs = require('fs'); fs.mkdirSync('dist/presentation/hud', {recursive: true}); fs.copyFileSync('src/presentation/hud/index.html', 'dist/presentation/hud/index.html');\"",
+    "test": "tsx --test tests/**/*.test.ts",
+    "cli": "tsx src/presentation/cli/index.ts",
+    "start": "tsx src/presentation/server/api-server.ts",
+    "dev": "tsx src/presentation/server/api-server.ts",
+    "lint": "tsc --noEmit"
+  },
+  "keywords": [
+    "tum",
+    "agentic",
+    "workos",
+    "erp",
+    "sovereign",
+    "pqc",
+    "ebpf",
+    "p2p",
+    "org-chart"
+  ],
+  "author": "TUM Group Holdings Co., Ltd. <daywakler01@gmail.com>",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsx": "^4.23.15",
+    "typescript": "^5.7.0"
+  },
+  "dependencies": {
+    "zod": "^3.25.76"
+  }
+}

@@ -9,12 +9,12 @@
 
 | Issue Key | Title | Priority | Category | Status |
 | :--- | :--- | :--- | :--- | :--- |
-| **WOS-EPIC-01** | Autonomous Workforce Directory & Dynamic Org-Chart Engine | `P1 - Critical` | Core ERP | `READY_FOR_DEV` |
-| **WOS-EPIC-02** | Autonomous Procurement-to-Pay (P2P) & 3-Way Matching Engine | `P1 - Critical` | Core ERP | `READY_FOR_DEV` |
-| **WOS-EPIC-03** | Delegated Agent Credential (DAC) Minting & Quantum Verification | `P1 - Critical` | Security/Trust | `READY_FOR_DEV` |
-| **WOS-EPIC-04** | Universal Legacy ERP & CRM Bi-Directional Adapter (SAP, Salesforce) | `P2 - High` | Integration | `READY_FOR_DEV` |
-| **WOS-BKL-05** | Multi-Worktree Semantic Merge Conflict Arbitrator | `P2 - High` | Innovation Backlog | `READY_FOR_DEV` |
-| **WOS-BKL-01B** | Agent Runtime eBPF Sandbox & Guardrail Interceptor | `P1 - Critical` | Innovation Backlog | `READY_FOR_DEV` |
+| **WOS-EPIC-01** | Autonomous Workforce Directory & Dynamic Org-Chart Engine | `P1 - Critical` | Core ERP | `VERIFIED_DONE` |
+| **WOS-EPIC-02** | Autonomous Procurement-to-Pay (P2P) & 3-Way Matching Engine | `P1 - Critical` | Core ERP | `VERIFIED_DONE` |
+| **WOS-EPIC-03** | Delegated Agent Credential (DAC) Minting & Quantum Verification | `P1 - Critical` | Security/Trust | `VERIFIED_DONE` |
+| **WOS-EPIC-04** | Universal Legacy ERP & CRM Bi-Directional Adapter (SAP, Salesforce) | `P2 - High` | Integration | `VERIFIED_DONE` |
+| **WOS-BKL-05** | Multi-Worktree Semantic Merge Conflict Arbitrator | `P2 - High` | Innovation Backlog | `VERIFIED_DONE` |
+| **WOS-BKL-01B** | Agent Runtime eBPF Sandbox & Guardrail Interceptor | `P1 - Critical` | Innovation Backlog | `VERIFIED_DONE` |
 
 ---
 
