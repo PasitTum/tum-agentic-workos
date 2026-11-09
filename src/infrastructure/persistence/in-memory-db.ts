@@ -82,9 +82,20 @@ export class InMemoryDatabase {
       budgetConsumed: 15_000_000
     };
 
+    const depAcc: DepartmentEntity = {
+      id: 'DEP-FIN',
+      code: 'FIN',
+      name: 'Corporate Accounting & Financial Governance',
+      headId: 'EMP-CFO-01',
+      parentDepartmentId: 'DEP-EXEC',
+      budgetAllocated: 20_000_000,
+      budgetConsumed: 4_500_000
+    };
+
     this.departments.set(depExec.id, depExec);
     this.departments.set(depProc.id, depProc);
     this.departments.set(depEng.id, depEng);
+    this.departments.set(depAcc.id, depAcc);
 
     // 2. Human Employees
     const empCeo: EmployeeEntity = {
@@ -96,7 +107,7 @@ export class InMemoryDatabase {
       supervisorId: null,
       status: 'ACTIVE',
       approvalLimit: 10_000_000, // 10M THB approval authority
-      directReportIds: ['EMP-CPO-01', 'EMP-CTO-01', 'AGT-ORCA-PRIME'],
+      directReportIds: ['EMP-CPO-01', 'EMP-CTO-01', 'EMP-CFO-01', 'AGT-ORCA-PRIME'],
       createdAt: '2026-10-01T00:00:00.000Z',
       updatedAt: '2026-11-01T00:00:00.000Z'
     };
@@ -129,9 +140,24 @@ export class InMemoryDatabase {
       updatedAt: '2026-11-01T00:00:00.000Z'
     };
 
+    const empCfo: EmployeeEntity = {
+      id: 'EMP-CFO-01',
+      name: 'Khun Kanya Finance Controller',
+      email: 'kanya.f@tum-group.internal',
+      title: 'Head of Corporate Accounting & Tax Controller',
+      departmentId: 'DEP-FIN',
+      supervisorId: 'EMP-CEO-01',
+      status: 'ACTIVE',
+      approvalLimit: 5_000_000,
+      directReportIds: [],
+      createdAt: '2026-10-01T00:00:00.000Z',
+      updatedAt: '2026-11-01T00:00:00.000Z'
+    };
+
     this.employees.set(empCeo.id, empCeo);
     this.employees.set(empCpo.id, empCpo);
     this.employees.set(empCto.id, empCto);
+    this.employees.set(empCfo.id, empCfo);
 
     // 3. Autonomous AI Agents
     const agtOrcaPrime: AgentEntity = {
@@ -231,5 +257,75 @@ export class InMemoryDatabase {
     };
 
     this.delegationLinks.set(delP2p.id, delP2p);
+
+    // 5. Seeded Accounting P2P Documents (PO-99201, GRN-8401, INV-2026-778)
+    const seedPo: PurchaseOrder = {
+      id: 'PO-ID-99201',
+      poNumber: 'PO-99201',
+      prNumber: 'PR-88120',
+      vendorId: 'VND-DATADYNAMICS',
+      vendorName: 'DataDynamics Thailand Co., Ltd.',
+      items: [{
+        itemId: 'ITEM-GPU-01',
+        sku: 'NV-H200-SXM',
+        description: 'Nvidia H200 SXM 141GB Compute Node Server',
+        quantity: 2,
+        unitPrice: 1_600_000,
+        lineTotal: 3_200_000
+      }],
+      subtotal: 3_200_000,
+      taxRate: 0.07,
+      taxAmount: 224_000,
+      totalAmount: 3_424_000,
+      status: 'ISSUED',
+      issuedAt: '2026-11-01T09:00:00.000Z',
+      paymentTerms: 'NET30'
+    };
+
+    const seedGrn: GoodsReceiptNote = {
+      id: 'GRN-ID-8401',
+      grnNumber: 'GRN-8401',
+      poNumber: 'PO-99201',
+      warehouseId: 'WH-EAST-01',
+      inspectorId: 'EMP-CPO-01',
+      inspectorType: 'HUMAN',
+      receivedAt: '2026-11-02T14:30:00.000Z',
+      items: [{
+        itemId: 'ITEM-GPU-01',
+        sku: 'NV-H200-SXM',
+        receivedQuantity: 2,
+        acceptedQuantity: 2,
+        rejectedQuantity: 0,
+        batchNumber: 'BATCH-NV-2026-Q4-09',
+        notes: 'Physical integrity passed. Factory cryptographic seal intact.'
+      }],
+      status: 'RECEIVED'
+    };
+
+    const seedInv: VendorInvoice = {
+      id: 'INV-ID-2026-778',
+      invoiceNumber: 'INV-2026-778',
+      vendorId: 'VND-DATADYNAMICS',
+      poNumber: 'PO-99201',
+      grnNumber: 'GRN-8401',
+      invoiceDate: '2026-11-03T10:00:00.000Z',
+      dueDate: '2026-12-03T10:00:00.000Z',
+      items: [{
+        itemId: 'ITEM-GPU-01',
+        sku: 'NV-H200-SXM',
+        billedQuantity: 2,
+        unitPrice: 1_600_000,
+        lineTotal: 3_200_000
+      }],
+      subtotal: 3_200_000,
+      taxAmount: 224_000,
+      totalAmount: 3_424_000,
+      bankAccountRef: 'SCB-014-99812-DATADYNAMICS',
+      status: 'PENDING_VERIFICATION'
+    };
+
+    this.purchaseOrders.set(seedPo.poNumber, seedPo);
+    this.goodsReceipts.set(seedGrn.grnNumber, seedGrn);
+    this.invoices.set(seedInv.invoiceNumber, seedInv);
   }
 }

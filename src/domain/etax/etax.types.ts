@@ -6,6 +6,15 @@ export type ETaxDocumentType =
   | '80'  // Debit Note (ใบเพิ่มหนี้)
   | '81'; // Credit Note (ใบลดหนี้)
 
+export type ETaxPurposeCode =
+  | 'CDNG01' // Price decreased (ลดราคาสินค้าเนื่องจากสินค้าผิดข้อกำหนด)
+  | 'CDNG02' // Goods returned / damaged (สินค้าชำรุดเสียหาย/ส่งคืน)
+  | 'CDNG03' // Service terminated (บอกเลิกสัญญาบริการ)
+  | 'CDNG99' // Other credit note purpose (เหตุอื่นตามที่กฎหมายกำหนด)
+  | 'DBNG01' // Price increased (คำนวณราคาสินค้าต่ำกว่าความเป็นจริง)
+  | 'DBNG02' // Additional quantity (เพิ่มจำนวนสินค้า)
+  | 'DBNG99'; // Other debit note purpose
+
 export interface PartyTaxIdentity {
   name: string;
   taxId: string; // 13-digit Thai Tax ID or Citizen ID
@@ -35,6 +44,12 @@ export interface ETaxInvoice {
   documentType: ETaxDocumentType;
   invoiceNumber: string;
   issueDate: string; // ISO 8601
+  purposeCode?: ETaxPurposeCode;
+  purposeReason?: string;
+  originalDocumentRef?: {
+    id: string;
+    issueDate: string;
+  };
   seller: PartyTaxIdentity;
   buyer: PartyTaxIdentity;
   items: ETaxLineItem[];
@@ -58,6 +73,46 @@ export interface ETaxInvoice {
 
 export interface ETaxValidationResult {
   isValid: boolean;
+  schemaVersion: string; // 'ETDA v2.1 (ER3-2560)'
+  checkedElements: number;
   errors: string[];
   warnings: string[];
+  validationDetails?: {
+    taxIdValidated: boolean;
+    branchCodeValidated: boolean;
+    arithmeticValidated: boolean;
+    signaturePresent: boolean;
+    rootNamespaceValid: boolean;
+  };
+}
+
+export interface ETaxSandboxSubmissionRequest {
+  invoiceNumber: string;
+  sellerTaxId: string;
+  documentType: ETaxDocumentType;
+  xmlPayload: string;
+  environment?: 'SANDBOX' | 'PRODUCTION';
+}
+
+export interface ETaxSandboxSubmissionResponse {
+  transactionId: string;
+  statusCode: 'ACK-200' | 'REJ-422' | 'ERR-500';
+  statusDescription: string;
+  etdaSchemaCompliance: 'COMPLIANT_V2_1' | 'NON_COMPLIANT';
+  rdSignature: string;
+  receivedAt: string;
+  testReceiptUrl: string;
+  validationDetails?: ETaxValidationResult;
+}
+
+export interface ETaxTransmissionLog {
+  id: string;
+  transactionId: string;
+  invoiceNumber: string;
+  sellerTaxId: string;
+  documentType: ETaxDocumentType;
+  statusCode: string;
+  statusDescription: string;
+  timestamp: string;
+  responsePayload: ETaxSandboxSubmissionResponse;
 }

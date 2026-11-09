@@ -1,12 +1,16 @@
 import { QuantumCryptoService } from '../../infrastructure/crypto/quantum-crypto.js';
 import { ETaxValidatorLogic } from '../../domain/etax/etax-validator.logic.js';
 import { ETaxXmlBuilderLogic } from '../../domain/etax/etax-xml-builder.logic.js';
+import { ETaxSandboxClient } from '../../infrastructure/etax/etax-sandbox-client.js';
 import { bahtText } from '../../domain/etax/baht-text.js';
 import {
   ETaxInvoice,
   PartyTaxIdentity,
   ETaxLineItem,
-  ETaxDocumentType
+  ETaxDocumentType,
+  ETaxValidationResult,
+  ETaxSandboxSubmissionResponse,
+  ETaxTransmissionLog
 } from '../../domain/etax/etax.types.js';
 import { SovereignTelemetryBus } from '../../infrastructure/telemetry/sovereign-telemetry.js';
 
@@ -25,11 +29,58 @@ export interface CreateETaxInvoiceRequest {
     discountAmount?: number;
   }>;
   vatRate?: number;
+  purposeCode?: any;
+  purposeReason?: string;
 }
 
 export class ETaxService {
   private eTaxInvoices = new Map<string, ETaxInvoice>();
   private sovereignKeyPair = QuantumCryptoService.generateKeyPair('NIST-FIPS-204-ML-DSA-65');
+  private sandboxClient = ETaxSandboxClient.getInstance();
+
+  constructor() {
+    this.seedDefaultInvoices();
+  }
+
+  private seedDefaultInvoices(): void {
+    // Seed an initial standard invoice for DataDynamics
+    try {
+      this.generateAndSealInvoice({
+        documentType: 'T03',
+        invoiceNumber: 'INV-2026-778',
+        seller: {
+          name: 'DataDynamics Thailand Co., Ltd.',
+          taxId: '0105558000018',
+          branchCode: '00000',
+          address: '123 Computer Center, Rama 9',
+          province: 'Bangkok',
+          postalCode: '10310',
+          countryCode: 'TH'
+        },
+        buyer: {
+          name: 'TUM Group Holdings Co., Ltd.',
+          taxId: '0105561023453',
+          branchCode: '00000',
+          address: '1 Sovereign Tower, Sathorn',
+          province: 'Bangkok',
+          postalCode: '10120',
+          countryCode: 'TH'
+        },
+        items: [
+          {
+            itemNumber: 1,
+            sku: 'NV-H200-SXM',
+            description: 'Nvidia H200 SXM 141GB Compute Node Server',
+            quantity: 2,
+            unitCode: 'C62',
+            unitPrice: 1_600_000
+          }
+        ]
+      });
+    } catch {
+      // In-memory initial seed fallback
+    }
+  }
 
   public generateAndSealInvoice(request: CreateETaxInvoiceRequest): ETaxInvoice {
     const vatRate = request.vatRate ?? 0.07;
@@ -62,6 +113,8 @@ export class ETaxService {
       documentType,
       invoiceNumber: request.invoiceNumber,
       issueDate: new Date().toISOString(),
+      purposeCode: request.purposeCode,
+      purposeReason: request.purposeReason,
       seller: request.seller,
       buyer: request.buyer,
       items,
@@ -118,6 +171,41 @@ export class ETaxService {
     );
 
     return draftInvoice;
+  }
+
+  public async submitToSandbox(invoiceNumber: string): Promise<ETaxSandboxSubmissionResponse> {
+    const invoice = this.eTaxInvoices.get(invoiceNumber);
+    if (!invoice) {
+      throw new Error(`e-Tax Invoice '${invoiceNumber}' not found.`);
+    }
+
+    if (!invoice.xmlPayload) {
+      invoice.xmlPayload = ETaxXmlBuilderLogic.buildXml(invoice);
+    }
+
+    const response = await this.sandboxClient.submitInvoice({
+      invoiceNumber: invoice.invoiceNumber,
+      sellerTaxId: invoice.seller.taxId,
+      documentType: invoice.documentType,
+      xmlPayload: invoice.xmlPayload,
+      environment: 'SANDBOX'
+    });
+
+    if (response.statusCode === 'ACK-200') {
+      invoice.status = 'ACKNOWLEDGED_RD';
+    } else {
+      invoice.status = 'REJECTED_RD';
+    }
+
+    return response;
+  }
+
+  public validateRawXml(xmlPayload: string): ETaxValidationResult {
+    return ETaxValidatorLogic.validateRawXml(xmlPayload);
+  }
+
+  public getSandboxTransmissionLogs(): ETaxTransmissionLog[] {
+    return this.sandboxClient.getTransmissionLogs();
   }
 
   public getInvoice(invoiceNumber: string): ETaxInvoice | undefined {

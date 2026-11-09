@@ -1,7 +1,13 @@
 export type PRStatus = 'DRAFT' | 'SUBMITTED' | 'APPROVED' | 'REJECTED';
 export type POStatus = 'ISSUED' | 'ACKNOWLEDGED' | 'FULFILLED' | 'CANCELLED';
 export type GRNStatus = 'RECEIVED' | 'PARTIAL' | 'REJECTED';
-export type InvoiceStatus = 'PENDING_VERIFICATION' | 'MATCH_APPROVED' | 'MATCH_REJECTED' | 'PAID';
+export type InvoiceStatus =
+  | 'PENDING_VERIFICATION'
+  | 'MATCH_APPROVED'
+  | 'MATCH_REJECTED'
+  | 'PENDING_HUMAN_APPROVAL'
+  | 'PAYMENT_AUTHORIZED'
+  | 'PAID';
 
 export interface LineItem {
   itemId: string;
@@ -73,6 +79,19 @@ export interface VendorInvoiceItem {
   lineTotal: number;
 }
 
+export interface HumanPaymentApproval {
+  approvedBy: string;
+  approverName: string;
+  approverRole: string;
+  approvedAt: string;
+  disbursementChannel: string;
+  whtRate: number; // e.g. 0.01 (1%) or 0.03 (3%)
+  whtAmount: number;
+  netPayableAmount: number;
+  authorizationStamp: string;
+  remark?: string;
+}
+
 export interface VendorInvoice {
   id: string;
   invoiceNumber: string;
@@ -87,6 +106,7 @@ export interface VendorInvoice {
   totalAmount: number;
   bankAccountRef: string;
   status: InvoiceStatus;
+  humanApproval?: HumanPaymentApproval;
 }
 
 export type MatchOutcome =
@@ -115,6 +135,7 @@ export interface ThreeWayMatchResult {
   outcome: MatchOutcome;
   isValid: boolean;
   autoApproved: boolean;
+  requiresHumanApproval?: boolean;
   totalDiscrepancies: number;
   discrepancies: MatchDiscrepancy[];
   poTotal: number;

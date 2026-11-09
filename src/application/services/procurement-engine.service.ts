@@ -6,7 +6,8 @@ import {
   GoodsReceiptNote,
   VendorInvoice,
   ThreeWayMatchResult,
-  MatchingPolicyConfig
+  MatchingPolicyConfig,
+  HumanPaymentApproval
 } from '../../domain/procurement/procurement.types.js';
 import {
   CreatePurchaseRequisitionSchema,
@@ -98,7 +99,8 @@ export class ProcurementEngineService {
 
     const poNumber = `PO-${Date.now().toString().slice(-6)}`;
     const subtotal = pr.totalAmount;
-    const taxAmount = Math.round(subtotal * validated.taxRate * 100) / 100;
+    const taxRate = validated.taxRate ?? 0.07;
+    const taxAmount = subtotal * taxRate;
     const totalAmount = subtotal + taxAmount;
 
     const po: PurchaseOrder = {
@@ -107,14 +109,14 @@ export class ProcurementEngineService {
       prNumber: pr.prNumber,
       vendorId: validated.vendorId,
       vendorName: validated.vendorName,
-      items: pr.items,
+      items: pr.items.map(i => ({ ...i })),
       subtotal,
-      taxRate: validated.taxRate,
+      taxRate,
       taxAmount,
       totalAmount,
       status: 'ISSUED',
       issuedAt: new Date().toISOString(),
-      paymentTerms: validated.paymentTerms
+      paymentTerms: validated.paymentTerms ?? 'Net 30'
     };
 
     this.db.purchaseOrders.set(po.poNumber, po);
@@ -122,9 +124,9 @@ export class ProcurementEngineService {
     SovereignTelemetryBus.emit(
       'PROCUREMENT',
       'PO_ISSUED',
-      validated.vendorId,
+      pr.requesterId,
       'SYSTEM',
-      { poNumber, vendor: validated.vendorName, totalAmount }
+      { poNumber: po.poNumber, vendorId: po.vendorId, totalAmount: po.totalAmount }
     );
 
     return po;
@@ -134,20 +136,35 @@ export class ProcurementEngineService {
     const validated = SubmitGoodsReceiptSchema.parse(input);
     const po = this.db.purchaseOrders.get(validated.poNumber);
     if (!po) {
-      throw new Error(`Referenced PO '${validated.poNumber}' not found.`);
+      throw new Error(`Purchase Order '${validated.poNumber}' not found.`);
+    }
+    if (po.status !== 'ISSUED' && po.status !== 'ACKNOWLEDGED') {
+      throw new Error(`Cannot record goods receipt for PO in state '${po.status}'.`);
     }
 
     const grnNumber = `GRN-${Date.now().toString().slice(-6)}`;
+    const items = validated.items.map(i => ({
+      itemId: i.itemId,
+      sku: i.sku,
+      receivedQuantity: i.receivedQuantity,
+      acceptedQuantity: i.acceptedQuantity,
+      rejectedQuantity: i.rejectedQuantity,
+      batchNumber: i.batchNumber,
+      notes: i.notes
+    }));
+
+    const hasRejections = items.some(i => i.rejectedQuantity > 0);
+
     const grn: GoodsReceiptNote = {
       id: `GRN-ID-${Date.now()}`,
       grnNumber,
-      poNumber: validated.poNumber,
+      poNumber: po.poNumber,
       warehouseId: validated.warehouseId,
       inspectorId: validated.inspectorId,
       inspectorType: validated.inspectorType,
       receivedAt: new Date().toISOString(),
-      items: validated.items,
-      status: validated.items.every(i => i.rejectedQuantity === 0) ? 'RECEIVED' : 'PARTIAL'
+      items,
+      status: hasRejections ? 'PARTIAL' : 'RECEIVED'
     };
 
     this.db.goodsReceipts.set(grn.grnNumber, grn);
@@ -157,7 +174,7 @@ export class ProcurementEngineService {
       'GRN_RECORDED',
       validated.inspectorId,
       validated.inspectorType,
-      { grnNumber, poNumber: po.poNumber, status: grn.status }
+      { grnNumber: grn.grnNumber, poNumber: po.poNumber, status: grn.status }
     );
 
     return grn;
@@ -167,16 +184,20 @@ export class ProcurementEngineService {
     const validated = SubmitVendorInvoiceSchema.parse(input);
     const po = this.db.purchaseOrders.get(validated.poNumber);
     if (!po) {
-      throw new Error(`Referenced PO '${validated.poNumber}' not found for invoice.`);
+      throw new Error(`Purchase Order '${validated.poNumber}' not found.`);
     }
 
     const items = validated.items.map(i => ({
-      ...i,
+      itemId: i.itemId,
+      sku: i.sku,
+      billedQuantity: i.billedQuantity,
+      unitPrice: i.unitPrice,
       lineTotal: i.billedQuantity * i.unitPrice
     }));
 
-    const subtotal = items.reduce((sum, item) => sum + item.lineTotal, 0);
-    const taxAmount = Math.round(subtotal * validated.taxRate * 100) / 100;
+    const subtotal = items.reduce((sum, i) => sum + i.lineTotal, 0);
+    const taxRate = validated.taxRate ?? 0.07;
+    const taxAmount = subtotal * taxRate;
     const totalAmount = subtotal + taxAmount;
 
     const invoice: VendorInvoice = {
@@ -239,9 +260,12 @@ export class ProcurementEngineService {
     this.db.matchResults.set(matchResult.invoiceNumber, matchResult);
 
     if (matchResult.isValid) {
-      invoice.status = 'MATCH_APPROVED';
       if (matchResult.autoApproved) {
+        invoice.status = 'MATCH_APPROVED';
         po.status = 'FULFILLED';
+      } else {
+        // Exceeds autonomous agent limit -> Hold for Human-in-the-Loop controller authorization
+        invoice.status = 'PENDING_HUMAN_APPROVAL';
       }
     } else {
       invoice.status = 'MATCH_REJECTED';
@@ -257,11 +281,117 @@ export class ProcurementEngineService {
         outcome: matchResult.outcome,
         isValid: matchResult.isValid,
         autoApproved: matchResult.autoApproved,
+        requiresHumanApproval: matchResult.requiresHumanApproval,
         varianceAmount: matchResult.varianceAmount
       }
     );
 
     return matchResult;
+  }
+
+  /**
+   * Human-in-the-Loop (HITL) Payment Approval
+   * Authorizes disbursement for a 3-Way Matched invoice exceeding agent financial authority.
+   */
+  public approvePaymentDisbursement(
+    invoiceNumber: string,
+    approverId: string,
+    remark?: string,
+    whtRate: number = 0.01,
+    disbursementChannel: string = 'SCB_CORPORATE_CONNECT'
+  ): {
+    invoice: VendorInvoice;
+    approval: HumanPaymentApproval;
+  } {
+    const invoice = this.db.invoices.get(invoiceNumber);
+    if (!invoice) {
+      throw new Error(`Invoice '${invoiceNumber}' not found.`);
+    }
+
+    const approver = this.db.employees.get(approverId);
+    if (!approver) {
+      throw new Error(`Authorized employee '${approverId}' not found in workforce directory.`);
+    }
+
+    if (approver.approvalLimit < invoice.totalAmount) {
+      throw new Error(
+        `Insufficient approval authority: Approver '${approver.name}' has limit of ${approver.approvalLimit.toLocaleString()} THB, but invoice total is ${invoice.totalAmount.toLocaleString()} THB.`
+      );
+    }
+
+    // Calculate Withholding Tax (WHT) on pre-VAT subtotal
+    const whtAmount = Math.round(invoice.subtotal * whtRate * 100) / 100;
+    const netPayableAmount = Math.round((invoice.totalAmount - whtAmount) * 100) / 100;
+    const authStamp = `HITL-AUTH-${Date.now().toString(16).toUpperCase()}-${approverId}`;
+
+    const approval: HumanPaymentApproval = {
+      approvedBy: approverId,
+      approverName: approver.name,
+      approverRole: approver.title,
+      approvedAt: new Date().toISOString(),
+      disbursementChannel,
+      whtRate,
+      whtAmount,
+      netPayableAmount,
+      authorizationStamp: authStamp,
+      remark: remark || 'Human-in-the-Loop financial controller approval released.'
+    };
+
+    invoice.status = 'PAYMENT_AUTHORIZED';
+    invoice.humanApproval = approval;
+
+    const po = this.db.purchaseOrders.get(invoice.poNumber);
+    if (po) {
+      po.status = 'FULFILLED';
+    }
+
+    SovereignTelemetryBus.emit(
+      'PROCUREMENT',
+      'P2P_HUMAN_PAYMENT_APPROVED',
+      approverId,
+      'HUMAN',
+      {
+        invoiceNumber,
+        poNumber: invoice.poNumber,
+        totalAmount: invoice.totalAmount,
+        whtAmount,
+        netPayableAmount,
+        disbursementChannel,
+        authorizationStamp: authStamp
+      }
+    );
+
+    return {
+      invoice,
+      approval
+    };
+  }
+
+  public rejectPayment(
+    invoiceNumber: string,
+    reviewerId: string,
+    reason: string
+  ): VendorInvoice {
+    const invoice = this.db.invoices.get(invoiceNumber);
+    if (!invoice) {
+      throw new Error(`Invoice '${invoiceNumber}' not found.`);
+    }
+
+    invoice.status = 'MATCH_REJECTED';
+
+    SovereignTelemetryBus.emit(
+      'PROCUREMENT',
+      'P2P_PAYMENT_REJECTED',
+      reviewerId,
+      'HUMAN',
+      {
+        invoiceNumber,
+        reviewerId,
+        reason
+      }
+    );
+
+    return invoice;
   }
 
   public listPurchaseOrders(): PurchaseOrder[] {

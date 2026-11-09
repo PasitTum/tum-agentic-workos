@@ -50,6 +50,7 @@ export class ThreeWayMatchLogic {
         outcome: 'FRAUD_ANOMALY_DETECTED',
         isValid: false,
         autoApproved: false,
+        requiresHumanApproval: false,
         totalDiscrepancies: 1,
         discrepancies: [{
           itemId: 'INVOICE_TOTAL',
@@ -164,10 +165,13 @@ export class ThreeWayMatchLogic {
 
     // Auto-approval rule
     const autoApproved = isValid && invoice.totalAmount <= policy.maxAutoApprovalThresholdTHB;
+    const requiresHumanApproval = isValid && !autoApproved;
 
     let auditNotes: string;
     if (outcome === 'MATCH_PERFECT') {
-      auditNotes = `Autonomous 3-Way Match Verified: Perfect match across PO ${po.poNumber}, GRN ${grn.grnNumber}, and Invoice ${invoice.invoiceNumber}.`;
+      auditNotes = autoApproved
+        ? `Autonomous 3-Way Match Verified: Perfect match across PO ${po.poNumber}, GRN ${grn.grnNumber}, and Invoice ${invoice.invoiceNumber}. Auto-approved for payment.`
+        : `Autonomous 3-Way Match Verified: Perfect match across PO ${po.poNumber}, GRN ${grn.grnNumber}, and Invoice ${invoice.invoiceNumber}. Amount (${invoice.totalAmount.toLocaleString()} THB) exceeds agent limit; Human-in-the-Loop authorization required.`;
     } else if (outcome === 'MATCH_WITHIN_TOLERANCE') {
       auditNotes = `Autonomous 3-Way Match Verified: Minor variance (${variancePercentage.toFixed(2)}%) within permitted policy threshold (${policy.priceTolerancePercentage}%).`;
     } else {
@@ -182,6 +186,7 @@ export class ThreeWayMatchLogic {
       outcome,
       isValid,
       autoApproved,
+      requiresHumanApproval,
       totalDiscrepancies: discrepancies.length,
       discrepancies,
       poTotal: po.totalAmount,

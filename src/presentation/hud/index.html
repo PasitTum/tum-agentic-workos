@@ -3,363 +3,1038 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🏛️ TUM Agentic WorkOS — Sovereign Enterprise Operating System</title>
+  <meta name="description" content="TUM Agentic WorkOS Corporate Accounting & Sovereign ERP Console.">
+  <title>TUM Agentic WorkOS: Corporate Accounting &amp; Sovereign Operations</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Mono:ital,wght@0,400..700;1,400..700&family=Host+Grotesk:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --bg: #090d16;
-      --card-bg: #101726;
-      --card-border: #1e293b;
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-      --accent-blue: #38bdf8;
-      --accent-cyan: #06b6d4;
-      --accent-green: #10b981;
-      --accent-purple: #a855f7;
-      --accent-amber: #f59e0b;
-      --accent-red: #ef4444;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
-      line-height: 1.5;
-      padding-bottom: 60px;
-    }
-    header {
-      background: linear-gradient(180deg, #0f172a 0%, #090d16 100%);
-      border-bottom: 1px solid var(--card-border);
-      padding: 18px 32px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      backdrop-filter: blur(12px);
-    }
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-    .brand h1 {
-      font-size: 20px;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-      background: linear-gradient(90deg, #38bdf8, #818cf8);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 10px;
-      border-radius: 9999px;
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .badge-green { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
-    .badge-blue { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
-    .badge-purple { background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3); }
+/* Hallmark Console · shape: modern-minimal · genre: console · theme: Console */
+:root {
+  --space-2xs: 4px;
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
 
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 28px;
-    }
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.35rem;
+  --text-2xl: 1.75rem;
 
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 16px;
-    }
-    .kpi-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      position: relative;
-      overflow: hidden;
-    }
-    .kpi-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0; height: 3px;
-      background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
-    }
-    .kpi-title { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
-    .kpi-value { font-size: 28px; font-weight: 700; color: #fff; }
-    .kpi-sub { font-size: 12px; color: var(--text-muted); }
+  --dur-short: 180ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 24px;
-    }
-    @media (max-width: 900px) {
-      .grid-2 { grid-template-columns: 1fr; }
-    }
+  --color-paper: oklch(17% 0.008 250);
+  --color-paper-2: oklch(21% 0.009 250);
+  --color-paper-3: oklch(13.5% 0.007 250);
+  --color-ink: oklch(95% 0.005 250);
+  --color-ink-2: oklch(83% 0.008 250);
+  --color-muted: oklch(71% 0.01 250);
+  --color-dim: oklch(50% 0.01 250);
+  --color-rule: oklch(31% 0.01 250);
+  --color-rule-2: oklch(42% 0.012 250);
 
-    .panel {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-    }
-    .panel-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid var(--card-border);
-      padding-bottom: 12px;
-    }
-    .panel-title {
-      font-size: 16px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+  --color-accent: oklch(82% 0.15 80);
+  --color-accent-hover: oklch(86% 0.16 80);
+  --color-accent-ink: oklch(18% 0.04 75);
+  --color-accent-soft: oklch(26% 0.04 80);
 
-    .agent-card {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid var(--card-border);
-      border-radius: 8px;
-      padding: 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-bottom: 10px;
-    }
-    .agent-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .agent-name { font-weight: 600; font-size: 14px; }
-    .agent-meta { font-size: 12px; color: var(--text-muted); }
+  --color-cool: oklch(77% 0.12 245);
+  --color-cool-soft: oklch(26% 0.04 245);
 
-    .skills-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-    .skill-tag {
-      background: rgba(56, 189, 248, 0.1);
-      border: 1px solid rgba(56, 189, 248, 0.2);
-      color: #7dd3fc;
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-size: 11px;
-    }
+  --color-ok: oklch(76% 0.15 150);
+  --color-ok-soft: oklch(24% 0.03 150);
+  --color-bad: oklch(70% 0.17 25);
+  --color-bad-soft: oklch(24% 0.035 25);
 
-    .btn {
-      background: #2563eb;
-      color: #fff;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 6px;
-      font-weight: 600;
-      font-size: 13px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .btn:hover { background: #1d4ed8; }
-    .btn-green { background: #059669; }
-    .btn-green:hover { background: #047857; }
+  --font-display: "Host Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-body: var(--font-display);
+  --font-outlier: "Atkinson Hyperlegible Mono", ui-monospace, SFMono-Regular, monospace;
 
-    .log-stream {
-      background: #050811;
-      border: 1px solid var(--card-border);
-      border-radius: 8px;
-      padding: 12px;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      font-size: 12px;
-      max-height: 260px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .log-item {
-      display: flex;
-      gap: 10px;
-    }
-    .log-ts { color: var(--text-muted); }
-    .log-action { color: #38bdf8; font-weight: 600; }
-    .log-msg { color: #cbd5e1; }
+  --radius-card: 6px;
+  --radius-sm: 4px;
+  --rule-hair: 1px;
+}
 
-    .match-box {
-      border: 1px solid var(--card-border);
-      border-radius: 8px;
-      padding: 16px;
-      background: rgba(0,0,0,0.2);
-    }
-    .match-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-    .match-status {
-      font-size: 13px;
-      font-weight: 700;
-      padding: 4px 12px;
-      border-radius: 6px;
-    }
-    .status-perfect { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981; }
-    .status-fail { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; }
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
-    table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
-    th { text-align: left; padding: 8px; color: var(--text-muted); border-bottom: 1px solid var(--card-border); }
-    td { padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+::selection {
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+}
+
+html, body {
+  overflow-x: clip;
+  scrollbar-color: var(--color-rule-2) var(--color-paper);
+}
+
+body {
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Header Console Bar */
+header {
+  background: var(--color-paper-2);
+  border-bottom: var(--rule-hair) solid var(--color-rule);
+  padding: var(--space-sm) var(--space-lg);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+.brand-mark {
+  width: 32px;
+  height: 32px;
+  background: var(--color-paper-3);
+  border: var(--rule-hair) solid var(--color-rule-2);
+  color: var(--color-accent);
+  font-family: var(--font-outlier);
+  font-weight: 700;
+  font-size: var(--text-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  letter-spacing: -0.02em;
+}
+.brand-title {
+  font-size: var(--text-md);
+  font-weight: 600;
+  color: var(--color-ink);
+  letter-spacing: -0.01em;
+}
+.brand-sub {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+  font-family: var(--font-outlier);
+}
+
+.header-badges {
+  display: flex;
+  gap: var(--space-xs);
+  align-items: center;
+}
+.spec-badge {
+  font-family: var(--font-outlier);
+  font-size: var(--text-xs);
+  padding: var(--space-2xs) var(--space-xs);
+  border-radius: var(--radius-sm);
+  border: var(--rule-hair) solid var(--color-rule);
+  background: var(--color-paper-3);
+  color: var(--color-ink-2);
+  white-space: nowrap;
+}
+.spec-badge-ok {
+  border-color: var(--color-ok);
+  color: var(--color-ok);
+  background: var(--color-ok-soft);
+}
+.spec-badge-accent {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  background: var(--color-accent-soft);
+}
+.spec-badge-warn {
+  border-color: oklch(75% 0.15 65);
+  color: oklch(85% 0.15 65);
+  background: oklch(24% 0.035 65);
+}
+
+.container {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+/* KPI Instrumentation Strip */
+.kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--rule-hair);
+  background: var(--color-rule);
+  border: var(--rule-hair) solid var(--color-rule);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+}
+@media (max-width: 960px) {
+  .kpi-strip { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 560px) {
+  .kpi-strip { grid-template-columns: 1fr; }
+}
+.kpi-cell {
+  background: var(--color-paper-2);
+  padding: var(--space-md) var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+}
+.kpi-label {
+  font-family: var(--font-outlier);
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.kpi-value {
+  font-family: var(--font-outlier);
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: var(--color-ink);
+  letter-spacing: -0.02em;
+}
+.kpi-sub {
+  font-size: var(--text-xs);
+  color: var(--color-dim);
+  font-family: var(--font-outlier);
+}
+
+/* Nav Tabs */
+.tab-bar {
+  display: flex;
+  gap: var(--space-xs);
+  border-bottom: var(--rule-hair) solid var(--color-rule);
+  padding-bottom: var(--space-xs);
+  overflow-x: auto;
+}
+.tab-btn {
+  font-family: var(--font-outlier);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-muted);
+  border: var(--rule-hair) solid transparent;
+  cursor: pointer;
+  transition: all var(--dur-short) var(--ease-out);
+  white-space: nowrap;
+}
+.tab-btn:hover {
+  color: var(--color-ink);
+  background: var(--color-paper-2);
+}
+.tab-btn.active {
+  color: var(--color-accent);
+  background: var(--color-paper-2);
+  border-color: var(--color-rule-2);
+}
+
+/* Layout Grids */
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: var(--space-lg);
+}
+@media (max-width: 1024px) {
+  .grid-2 { grid-template-columns: 1fr; }
+}
+
+.panel {
+  background: var(--color-paper-2);
+  color: var(--color-ink);
+  border: var(--rule-hair) solid var(--color-rule);
+  border-radius: var(--radius-card);
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: var(--rule-hair) solid var(--color-rule);
+  padding-bottom: var(--space-sm);
+}
+.panel-title {
+  font-size: var(--text-md);
+  font-weight: 600;
+  color: var(--color-ink);
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+/* Interactive Buttons */
+.btn {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  white-space: nowrap;
+  border: var(--rule-hair) solid var(--color-rule-2);
+  background: var(--color-paper-3);
+  color: var(--color-ink);
+  transition: border-color var(--dur-short) var(--ease-out), color var(--dur-short) var(--ease-out);
+}
+.btn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+.btn:active {
+  opacity: 0.9;
+}
+.btn:disabled, [disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.btn-primary {
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+  border-color: var(--color-accent);
+}
+.btn-primary:hover {
+  background: var(--color-accent-hover);
+  color: var(--color-accent-ink);
+}
+.btn-warn {
+  border-color: var(--color-bad);
+  color: var(--color-bad);
+  background: var(--color-bad-soft);
+}
+.btn-warn:hover {
+  background: var(--color-bad);
+  color: var(--color-paper);
+}
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-outlier);
+  font-size: var(--text-xs);
+  margin-top: var(--space-xs);
+}
+th {
+  text-align: left;
+  padding: var(--space-xs);
+  color: var(--color-muted);
+  border-bottom: var(--rule-hair) solid var(--color-rule);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+td {
+  padding: var(--space-xs);
+  border-bottom: var(--rule-hair) solid var(--color-rule);
+  color: var(--color-ink-2);
+}
+
+/* Human-in-the-Loop Approval Box */
+.hitl-box {
+  background: var(--color-paper-3);
+  border: var(--rule-hair) solid var(--color-rule-2);
+  border-radius: var(--radius-sm);
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+.hitl-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: var(--space-xs);
+  border-bottom: var(--rule-hair) solid var(--color-rule);
+}
+.hitl-policy-alert {
+  background: oklch(24% 0.035 65);
+  border: var(--rule-hair) solid oklch(75% 0.15 65);
+  border-radius: var(--radius-sm);
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--text-xs);
+  color: oklch(90% 0.05 65);
+  line-height: 1.4;
+}
+.form-row {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: var(--space-sm);
+  align-items: center;
+  font-size: var(--text-xs);
+}
+.form-label {
+  color: var(--color-muted);
+  font-family: var(--font-outlier);
+}
+select, input[type="text"] {
+  background: var(--color-paper-2);
+  border: var(--rule-hair) solid var(--color-rule);
+  color: var(--color-ink);
+  font-family: var(--font-outlier);
+  font-size: var(--text-xs);
+  padding: var(--space-xs);
+  border-radius: var(--radius-sm);
+  width: 100%;
+}
+select:focus, input[type="text"]:focus {
+  border-color: var(--color-accent);
+  outline: none;
+}
+
+/* XML Preview Box */
+.code-preview {
+  background: var(--color-paper-3);
+  border: var(--rule-hair) solid var(--color-rule);
+  border-radius: var(--radius-sm);
+  padding: var(--space-sm);
+  font-family: var(--font-outlier);
+  font-size: var(--text-xs);
+  color: var(--color-ink-2);
+  max-height: 240px;
+  overflow-y: auto;
+  white-space: pre;
+  line-height: 1.4;
+}
+
+/* Telemetry Terminal */
+.log-stream {
+  background: var(--color-paper-3);
+  border: var(--rule-hair) solid var(--color-rule);
+  border-radius: var(--radius-sm);
+  padding: var(--space-sm);
+  font-family: var(--font-outlier);
+  font-size: var(--text-xs);
+  max-height: 220px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+}
+.log-item {
+  display: flex;
+  gap: var(--space-xs);
+  line-height: 1.4;
+}
+.log-ts { color: var(--color-dim); min-width: 65px; }
+.log-action { color: var(--color-accent); font-weight: 600; min-width: 130px; }
+.log-msg { color: var(--color-ink-2); word-break: break-all; }
   </style>
 </head>
 <body>
   <header>
     <div class="brand">
-      <span style="font-size: 24px;">🏛️</span>
+      <div class="brand-mark">TUM</div>
       <div>
-        <h1>TUM Agentic WorkOS</h1>
-        <div style="font-size: 11px; color: var(--text-muted);">Sovereign Enterprise ERP & Autonomous AI Workforce</div>
+        <div class="brand-title">TUM Agentic WorkOS</div>
+        <div class="brand-sub">Corporate Accounting &amp; Sovereign Operations Console</div>
       </div>
     </div>
-    <div style="display: flex; gap: 10px; align-items: center;">
-      <span class="badge badge-green">🟢 NIST FIPS 204 PQC Active</span>
-      <span class="badge badge-purple">🛡️ eBPF Guardrail Armed</span>
-      <span class="badge badge-blue">👤 Dr. Ake (Leader)</span>
+    <div class="header-badges">
+      <span class="spec-badge spec-badge-ok">ETDA v2.1 COMPLIANT</span>
+      <span class="spec-badge spec-badge-accent">NIST FIPS 204 PQC ACTIVE</span>
+      <span class="spec-badge">RD SANDBOX HOST-TO-HOST</span>
+      <span class="spec-badge" id="operator-badge">OPERATOR: FINANCIAL CONTROLLER</span>
     </div>
   </header>
 
   <div class="container">
-    <!-- Top KPIs -->
-    <div class="kpi-grid">
-      <div class="kpi-card">
-        <div class="kpi-title">Active AI Workforce</div>
-        <div class="kpi-value" id="kpi-agents">4 Agents</div>
-        <div class="kpi-sub">Orca Prime, P2P Matcher, eBPF Sentry, Merge Arbiter</div>
+    <!-- Financial Telemetry Strip -->
+    <div class="kpi-strip">
+      <div class="kpi-cell">
+        <div class="kpi-label">Accounts Payable Queue</div>
+        <div class="kpi-value" id="kpi-ap">3,424,000 THB</div>
+        <div class="kpi-sub">1 Invoice pending Dual Control</div>
       </div>
-      <div class="kpi-card">
-        <div class="kpi-title">Autonomous P2P Matching</div>
-        <div class="kpi-value" id="kpi-p2p">100% Verified</div>
-        <div class="kpi-sub">3-Way PO vs GRN vs Invoice Reconciliation</div>
+      <div class="kpi-cell">
+        <div class="kpi-label">P2P 3-Way Match Verification</div>
+        <div class="kpi-value" id="kpi-p2p">100.00%</div>
+        <div class="kpi-sub">0 Discrepancies across PO/GRN/Inv</div>
       </div>
-      <div class="kpi-card">
-        <div class="kpi-title">Delegated Credentials (DAC)</div>
-        <div class="kpi-value" id="kpi-dac">Quantum Safe</div>
-        <div class="kpi-sub">NIST ML-DSA-65 Zero-Trust Envelopes</div>
+      <div class="kpi-cell">
+        <div class="kpi-label">Revenue Dept e-Tax Status</div>
+        <div class="kpi-value" id="kpi-etax">ETDA v2.1 VALID</div>
+        <div class="kpi-sub">Host-to-Host CPA Sandbox Active</div>
       </div>
-      <div class="kpi-card">
-        <div class="kpi-title">Guardrail Interceptions</div>
-        <div class="kpi-value" id="kpi-guardrail">0 Breaches</div>
-        <div class="kpi-sub">Active Syscall Sandboxing Engine</div>
+      <div class="kpi-cell">
+        <div class="kpi-label">Withholding Tax Accrual</div>
+        <div class="kpi-value" id="kpi-wht">32,000 THB</div>
+        <div class="kpi-sub">1% Hardware (Section 3 Trevis)</div>
       </div>
     </div>
 
-    <!-- Main Grid: Workforce & P2P -->
-    <div class="grid-2">
-      <!-- Panel 1: Workforce Directory -->
-      <div class="panel">
-        <div class="panel-header">
-          <div class="panel-title">👥 Autonomous Workforce Directory & Dynamic Hierarchy</div>
-          <button class="btn" onclick="fetchOrgChart()">Refresh Hierarchy</button>
-        </div>
-        <div id="workforce-list">
-          <div style="color: var(--text-muted); font-size: 13px;">Loading autonomous workforce roster...</div>
-        </div>
-      </div>
+    <!-- Workspace Tabs -->
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('p2p')">[TAB 1] Accounts Payable &amp; P2P 3-Way Match</button>
+      <button class="tab-btn" onclick="switchTab('etax')">[TAB 2] e-Tax Invoice &amp; RD Sandbox</button>
+      <button class="tab-btn" onclick="switchTab('gl')">[TAB 3] General Ledger &amp; WHT Vouchers</button>
+      <button class="tab-btn" onclick="switchTab('workforce')">[TAB 4] Autonomous Workforce &amp; DAC</button>
+    </div>
 
-      <!-- Panel 2: P2P 3-Way Match Simulation -->
-      <div class="panel">
-        <div class="panel-header">
-          <div class="panel-title">📦 Autonomous Procurement-to-Pay (3-Way Matching Engine)</div>
-          <button class="btn btn-green" onclick="runP2pDemo()">Run 3-Way Match Simulation</button>
-        </div>
-        <div id="p2p-simulation-output">
-          <div class="match-box">
-            <div class="match-header">
+    <!-- TAB 1: P2P 3-Way Match & Human-in-the-Loop Approval UI -->
+    <div id="section-p2p" class="tab-content">
+      <div class="grid-2">
+        <!-- Panel 1.1: Match Comparator -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Procurement-to-Pay 3-Way Reconciliation</div>
+            <button class="btn btn-primary" onclick="runP2pEvaluation()">Run 3-Way Match Evaluation</button>
+          </div>
+
+          <div id="p2p-comparator-body">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
               <div>
-                <strong>Simulation Scenario</strong>
-                <div style="font-size: 12px; color: var(--text-muted);">High-Performance GPU Compute Server Cluster</div>
+                <strong style="color: var(--color-ink);">Active Match Target: INV-2026-778</strong>
+                <div style="font-size: 12px; color: var(--color-muted);">Vendor: DataDynamics Thailand Co., Ltd. (Tax ID: 0105558000018)</div>
               </div>
-              <span class="match-status status-perfect">READY FOR EVALUATION</span>
+              <span class="spec-badge spec-badge-warn" id="p2p-status-badge">PENDING_EVALUATION</span>
             </div>
+
             <table>
               <thead>
-                <tr><th>Document</th><th>Ref Number</th><th>Items</th><th>Amount</th><th>Status</th></tr>
+                <tr>
+                  <th>Document Type</th>
+                  <th>Reference Number</th>
+                  <th>Line Item Description</th>
+                  <th>Quantity</th>
+                  <th>Amount (THB)</th>
+                  <th>Status</th>
+                </tr>
               </thead>
               <tbody>
-                <tr><td>Purchase Order</td><td>PO-99201</td><td>2x Nvidia H200 SXM</td><td>3,200,000 THB</td><td>ISSUED</td></tr>
-                <tr><td>Goods Receipt</td><td>GRN-8401</td><td>2x Accepted, 0x Rejected</td><td>Warehouse A</td><td>RECEIVED</td></tr>
-                <tr><td>Vendor Invoice</td><td>INV-2026-778</td><td>2x Nvidia H200 SXM</td><td>3,200,000 THB</td><td>PENDING</td></tr>
+                <tr>
+                  <td>Purchase Order</td>
+                  <td>PO-99201</td>
+                  <td>Nvidia H200 SXM 141GB Compute Node</td>
+                  <td>2 units</td>
+                  <td>3,200,000.00</td>
+                  <td><span class="spec-badge">ISSUED</span></td>
+                </tr>
+                <tr>
+                  <td>Goods Receipt Note</td>
+                  <td>GRN-8401</td>
+                  <td>Nvidia H200 SXM 141GB Compute Node</td>
+                  <td>2 accepted (0 rejected)</td>
+                  <td>Warehouse A</td>
+                  <td><span class="spec-badge spec-badge-ok">RECEIVED</span></td>
+                </tr>
+                <tr>
+                  <td>Vendor Tax Invoice</td>
+                  <td>INV-2026-778</td>
+                  <td>Nvidia H200 SXM 141GB Compute Node</td>
+                  <td>2 units billed</td>
+                  <td>3,424,000.00 (VAT 7%)</td>
+                  <td><span class="spec-badge spec-badge-warn" id="inv-table-status">VERIFICATION</span></td>
+                </tr>
               </tbody>
             </table>
+
+            <div id="match-diagnostics-card" style="margin-top: 12px; background: var(--color-paper-3); border: var(--rule-hair) solid var(--color-rule); border-radius: var(--radius-sm); padding: 12px; display: none;">
+              <div style="font-weight: 600; color: var(--color-ink); margin-bottom: 4px;">Reconciliation Metrics</div>
+              <div style="font-family: var(--font-outlier); font-size: 12px; line-height: 1.6;">
+                <div>[CHECK 1] Quantity Alignment : 2 Ordered == 2 Received == 2 Billed &rarr; <span style="color: var(--color-ok);">PASSED (0.00% Variance)</span></div>
+                <div>[CHECK 2] Unit Price Audit  : 1,600,000.00 THB == 1,600,000.00 THB &rarr; <span style="color: var(--color-ok);">PASSED (0.00% Variance)</span></div>
+                <div>[CHECK 3] VAT Arithmetic    : 3,200,000.00 * 7% == 224,000.00 THB &rarr; <span style="color: var(--color-ok);">PASSED (Exact)</span></div>
+                <div>[CHECK 4] Financial Limit   : Total 3,424,000.00 THB exceeds Agent Cap (500,000.00 THB) &rarr; <span style="color: oklch(85% 0.15 65);">HOLD FOR CONTROLLER</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Panel 1.2: Human-in-the-Loop Payment Approval Action Bar -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Human-in-the-Loop Payment Authorization</div>
+            <span class="spec-badge spec-badge-warn" id="hitl-state-badge">AWAITING CONTROLLER</span>
+          </div>
+
+          <div class="hitl-box">
+            <div class="hitl-policy-alert">
+              [GOVERNANCE POLICY NOTICE] Invoice exceeds AGT-P2P-MATCHER delegated financial limit (500,000 THB). Release of funds requires Controller dual authorization.
+            </div>
+
+            <div class="form-row">
+              <span class="form-label">Authorized Approver</span>
+              <select id="approver-select">
+                <option value="EMP-CEO-01">Dr. Ake (CEO / Sovereign Architect - Cap: 10,000,000 THB)</option>
+                <option value="EMP-CFO-01" selected>Khun Kanya (Head of Accounting &amp; Tax - Cap: 5,000,000 THB)</option>
+                <option value="EMP-CTO-01">Dr. Somchai V. (Platform VP - Cap: 3,000,000 THB)</option>
+                <option value="EMP-CPO-01">Napat Srisuwan (Chief Procurement Officer - Cap: 2,000,000 THB)</option>
+              </select>
+            </div>
+
+            <div class="form-row">
+              <span class="form-label">WHT Deduction</span>
+              <select id="wht-rate-select" onchange="updatePaymentCalculation()">
+                <option value="0.01" selected>1% - Computer Hardware / Equipment (Section 3 Trevis)</option>
+                <option value="0.03">3% - Professional Services &amp; AI Engineering</option>
+                <option value="0.00">0% - WHT Exempt</option>
+              </select>
+            </div>
+
+            <div class="form-row">
+              <span class="form-label">Disbursement Rail</span>
+              <select id="disbursement-channel">
+                <option value="SCB_CORPORATE_CONNECT" selected>SCB Corporate Connect (API Host-to-Host)</option>
+                <option value="BAHTNET_HIGH_VALUE">BAHTNET Real-Time Gross Settlement</option>
+                <option value="PROMPTPAY_B2B">PromptPay Corporate B2B Direct</option>
+              </select>
+            </div>
+
+            <div class="form-row">
+              <span class="form-label">Internal Remark</span>
+              <input type="text" id="approval-remark" value="Hardware inspection verified. 3-way match passed 100%. Authorized for disbursement.">
+            </div>
+
+            <div style="border-top: var(--rule-hair) solid var(--color-rule); padding-top: 8px; font-family: var(--font-outlier); font-size: 12px; line-height: 1.6;">
+              <div style="display: flex; justify-content: space-between;"><span>Subtotal:</span><span>3,200,000.00 THB</span></div>
+              <div style="display: flex; justify-content: space-between;"><span>VAT (7%):</span><span>+224,000.00 THB</span></div>
+              <div style="display: flex; justify-content: space-between; color: var(--color-bad);"><span id="wht-label">Less WHT (1%):</span><span id="wht-val">-32,000.00 THB</span></div>
+              <div style="display: flex; justify-content: space-between; font-weight: 700; color: var(--color-ink); border-top: var(--rule-hair) solid var(--color-rule); margin-top: 4px; padding-top: 4px;">
+                <span>Net Cash Disbursement:</span><span id="net-disbursement-val">3,392,000.00 THB</span>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: var(--space-xs); margin-top: 4px;">
+              <button class="btn btn-primary" id="btn-hitl-approve" style="flex: 1;" onclick="executeHitlApproval()">Authorize Payment Disbursement</button>
+              <button class="btn btn-warn" onclick="rejectPaymentDisbursement()">Reject / Request Credit Note</button>
+            </div>
+
+            <div id="hitl-receipt-output" style="display: none; background: var(--color-paper-2); border: var(--rule-hair) solid var(--color-ok); border-radius: var(--radius-sm); padding: 8px; font-family: var(--font-outlier); font-size: 11px;">
+              <div style="color: var(--color-ok); font-weight: 600;">DISBURSEMENT AUTHORIZATION CONFIRMED</div>
+              <div id="hitl-receipt-stamp" style="word-break: break-all; margin-top: 2px; color: var(--color-ink-2);"></div>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Main Grid: Quantum DAC & eBPF -->
-    <div class="grid-2">
-      <!-- Panel 3: Delegated Agent Credentials (DAC) -->
-      <div class="panel">
-        <div class="panel-header">
-          <div class="panel-title">⚛️ Delegated Agent Credential (DAC) Minting Console</div>
-          <button class="btn" onclick="mintDacDemo()">Mint Quantum DAC</button>
+    <!-- TAB 2: e-Tax Invoice & RD Sandbox Gateway -->
+    <div id="section-etax" class="tab-content" style="display: none;">
+      <div class="grid-2">
+        <!-- Panel 2.1: Generated e-Tax Documents -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">e-Tax Invoice Repository (ETDA ER3-2560 v2.1)</div>
+            <button class="btn" onclick="fetchETaxInvoices()">Refresh Repository</button>
+          </div>
+          <div id="etax-invoice-list">
+            <div style="color: var(--color-muted); font-size: 13px;">Loading sealed e-Tax documents…</div>
+          </div>
         </div>
-        <div id="dac-output">
-          <div class="agent-card">
-            <div class="agent-header">
-              <span class="agent-name">DAC-P2P-MATCHER-001</span>
-              <span class="badge badge-green">ACTIVE & VERIFIED</span>
+
+        <!-- Panel 2.2: RD Sandbox Live Submission -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Revenue Department Sandbox Gateway</div>
+            <button class="btn btn-primary" onclick="submitSelectedToSandbox()">Transmit to RD Sandbox</button>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; justify-content: space-between; font-family: var(--font-outlier); font-size: 12px;">
+              <span>Target Endpoint:</span>
+              <span style="color: var(--color-accent);">https://etax.rd.go.th/api/v1/sandbox/submit</span>
             </div>
-            <div class="agent-meta">Issuer: Dr. Ake (CEO) &rarr; Delegatee: P2P Matcher Agent</div>
-            <div style="font-size: 12px; margin-top: 4px;">
-              <strong>Spending Cap:</strong> 500,000 THB | <strong>Algorithm:</strong> NIST FIPS 204 ML-DSA-65
+            <div style="display: flex; justify-content: space-between; font-family: var(--font-outlier); font-size: 12px;">
+              <span>Target Invoice:</span>
+              <strong id="sandbox-target-inv">INV-2026-778</strong>
             </div>
-            <div style="font-size: 11px; color: var(--text-muted); font-family: monospace; word-break: break-all; margin-top: 6px;">
-              Envelope: mldsa65_sig_7f8a9e01b44c82d3...
+
+            <div class="code-preview" id="xml-inspection-view">&lt;!-- XML Payload Preview --&gt;
+&lt;rsm:TaxInvoice_CrossIndustryInvoice 
+  xmlns:rsm="urn:etda:uncefact:data:standard:TaxInvoice_CrossIndustryInvoice:2" 
+  xmlns:ram="urn:etda:uncefact:data:standard:TaxInvoice_ReusableAggregateBusinessInformationEntity:2"&gt;
+  &lt;rsm:ExchangedDocumentContext&gt;
+    &lt;ram:GuidelineSpecifiedDocumentContextParameter&gt;
+      &lt;ram:ID schemeAgencyID="ETDA" schemeVersionID="v2.1"&gt;ER3-2560&lt;/ram:ID&gt;
+    &lt;/ram:GuidelineSpecifiedDocumentContextParameter&gt;
+  &lt;/rsm:ExchangedDocumentContext&gt;
+&lt;/rsm:TaxInvoice_CrossIndustryInvoice&gt;</div>
+
+            <div id="sandbox-ack-card" style="display: none; background: var(--color-paper-3); border: var(--rule-hair) solid var(--color-rule); border-radius: var(--radius-sm); padding: 12px; font-family: var(--font-outlier); font-size: 12px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <span style="font-weight: 600; color: var(--color-ok);">RD SANDBOX ACK-200 RECEIVED</span>
+                <span class="spec-badge spec-badge-ok">COMPLIANT_V2_1</span>
+              </div>
+              <div id="sandbox-ack-details" style="line-height: 1.5; color: var(--color-ink-2);"></div>
             </div>
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- Panel 4: eBPF Guardrail & Telemetry -->
+    <!-- TAB 3: General Ledger & Withholding Tax (WHT) Vouchers -->
+    <div id="section-gl" class="tab-content" style="display: none;">
       <div class="panel">
         <div class="panel-header">
-          <div class="panel-title">🛡️ eBPF Kernel Guardrail & Sovereign Telemetry Stream</div>
-          <button class="btn" onclick="testGuardrailBlock()">Trigger Sandbox Block Test</button>
+          <div class="panel-title">Automated Double-Entry General Ledger Sync (SAP BAPI Formatted)</div>
+          <button class="btn" onclick="fetchGlVouchers()">Refresh Ledger</button>
         </div>
-        <div class="log-stream" id="telemetry-logs">
-          <div class="log-item">
-            <span class="log-ts">12:11:00</span>
-            <span class="log-action">[SYSTEM_INIT]</span>
-            <span class="log-msg">TUM Agentic WorkOS Sovereign Runtime Initialized</span>
+        <table>
+          <thead>
+            <tr>
+              <th>Voucher ID</th>
+              <th>Account Code &amp; Title</th>
+              <th>Posting Description</th>
+              <th>Debit (THB)</th>
+              <th>Credit (THB)</th>
+              <th>Audit Seal</th>
+            </tr>
+          </thead>
+          <tbody id="gl-voucher-rows">
+            <tr>
+              <td>JV-2026-001</td>
+              <td>5100-00 Operating &amp; Materials Expense</td>
+              <td>Nvidia H200 SXM 141GB Compute Node</td>
+              <td>3,200,000.00</td>
+              <td>-</td>
+              <td><span class="spec-badge spec-badge-ok">NIST FIPS 204</span></td>
+            </tr>
+            <tr>
+              <td>JV-2026-001</td>
+              <td>1130-00 Input VAT (7%)</td>
+              <td>Input VAT 7% on INV-2026-778</td>
+              <td>224,000.00</td>
+              <td>-</td>
+              <td><span class="spec-badge spec-badge-ok">VERIFIED</span></td>
+            </tr>
+            <tr>
+              <td>JV-2026-001</td>
+              <td>2140-00 Withholding Tax Payable</td>
+              <td>WHT 1% Section 3 Trevis</td>
+              <td>-</td>
+              <td>32,000.00</td>
+              <td><span class="spec-badge spec-badge-ok">VERIFIED</span></td>
+            </tr>
+            <tr>
+              <td>JV-2026-001</td>
+              <td>2100-00 Trade Accounts Payable</td>
+              <td>DataDynamics Thailand Co., Ltd.</td>
+              <td>-</td>
+              <td>3,392,000.00</td>
+              <td><span class="spec-badge spec-badge-ok">VERIFIED</span></td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="display: flex; justify-content: flex-end; gap: var(--space-lg); font-family: var(--font-outlier); font-size: 13px; font-weight: 700; border-top: var(--rule-hair) solid var(--color-rule); padding-top: 8px;">
+          <span>Total Debit: 3,424,000.00 THB</span>
+          <span>Total Credit: 3,424,000.00 THB</span>
+          <span style="color: var(--color-ok);">Variance: 0.00 THB (Balanced)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: Autonomous Workforce & Governance -->
+    <div id="section-workforce" class="tab-content" style="display: none;">
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Autonomous AI Workforce Roster</div>
+            <button class="btn" onclick="fetchOrgChart()">Refresh Roster</button>
           </div>
-          <div class="log-item">
-            <span class="log-ts">12:11:05</span>
-            <span class="log-action">[EBPF_GUARDRAIL]</span>
-            <span class="log-msg">Syscall interceptor active. Policy strict Zero-Trust engaged.</span>
+          <div id="workforce-list">
+            <div style="color: var(--color-muted); font-size: 13px;">Loading autonomous workforce roster…</div>
           </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Delegated Agent Credentials (DAC) &amp; PQC</div>
+            <button class="btn" onclick="mintDacDemo()">Mint Quantum DAC</button>
+          </div>
+          <div id="dac-output">
+            <div style="background: var(--color-paper-3); border: var(--rule-hair) solid var(--color-rule); border-radius: var(--radius-sm); padding: 12px;">
+              <div style="display: flex; justify-content: space-between;">
+                <code style="color: var(--color-ink); font-weight: 600;">DAC-P2P-MATCHER-001</code>
+                <span class="spec-badge spec-badge-ok">Active and verified</span>
+              </div>
+              <div style="font-size: 12px; color: var(--color-muted); margin-top: 4px;">Issuer: Napat Srisuwan (CPO) &rarr; Delegatee: AGT-P2P-MATCHER</div>
+              <div style="font-size: 12px; color: var(--color-ink-2); margin-top: 4px;">Spending Cap: 500,000.00 THB | Algorithm: NIST FIPS 204 ML-DSA-65</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Tamper-Evident Telemetry Stream -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">Tamper-Evident Operations Audit Stream</div>
+        <button class="btn" onclick="clearTelemetryDisplay()">Clear View</button>
+      </div>
+      <div class="log-stream" id="telemetry-logs">
+        <div class="log-item">
+          <span class="log-ts">12:11:00</span>
+          <span class="log-action">[SYSTEM_INIT]</span>
+          <span class="log-msg">TUM Agentic WorkOS sovereign runtime active. ETDA v2.1 schema validation engaged.</span>
+        </div>
+        <div class="log-item">
+          <span class="log-ts">12:11:05</span>
+          <span class="log-action">[EBPF_GUARDRAIL]</span>
+          <span class="log-msg">Kernel guardrail active. Syscall interception enabled. 0 breaches recorded.</span>
         </div>
       </div>
     </div>
   </div>
 
   <script>
+    let currentInvoice = 'INV-2026-778';
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+
+      const target = document.getElementById('section-' + tabId);
+      if (target) {
+        target.style.display = 'block';
+      }
+
+      const activeBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(tabId));
+      if (activeBtn) activeBtn.classList.add('active');
+
+      if (tabId === 'etax') fetchETaxInvoices();
+      if (tabId === 'workforce') fetchOrgChart();
+      if (tabId === 'gl') fetchGlVouchers();
+    }
+
+    function updatePaymentCalculation() {
+      const whtRate = parseFloat(document.getElementById('wht-rate-select').value);
+      const subtotal = 3200000;
+      const vat = 224000;
+      const wht = Math.round(subtotal * whtRate);
+      const net = (subtotal + vat) - wht;
+
+      document.getElementById('wht-label').textContent = `Less WHT (${(whtRate * 100).toFixed(0)}%):`;
+      document.getElementById('wht-val').textContent = `-${wht.toLocaleString()}.00 THB`;
+      document.getElementById('net-disbursement-val').textContent = `${net.toLocaleString()}.00 THB`;
+      document.getElementById('kpi-wht').textContent = `${wht.toLocaleString()} THB`;
+    }
+
+    async function runP2pEvaluation() {
+      try {
+        const res = await fetch('/api/v1/procurement/three-way-match', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ invoiceNumber: currentInvoice })
+        });
+        const data = await res.json();
+        const result = data.result;
+
+        document.getElementById('p2p-status-badge').className = 'spec-badge spec-badge-ok';
+        document.getElementById('p2p-status-badge').textContent = 'MATCH_VERIFIED (100%)';
+        document.getElementById('inv-table-status').className = 'spec-badge spec-badge-warn';
+        document.getElementById('inv-table-status').textContent = 'PENDING_APPROVAL';
+
+        document.getElementById('match-diagnostics-card').style.display = 'block';
+        document.getElementById('hitl-state-badge').className = 'spec-badge spec-badge-warn';
+        document.getElementById('hitl-state-badge').textContent = 'AWAITING SIGN-OFF';
+
+        addLog('P2P_EVALUATED', `Reconciliation for ${currentInvoice} verified. Hold applied: Exceeds 500k THB cap.`);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    async function executeHitlApproval() {
+      const approverId = document.getElementById('approver-select').value;
+      const whtRate = parseFloat(document.getElementById('wht-rate-select').value);
+      const channel = document.getElementById('disbursement-channel').value;
+      const remark = document.getElementById('approval-remark').value;
+
+      try {
+        const res = await fetch('/api/v1/procurement/approve-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            invoiceNumber: currentInvoice,
+            approverId,
+            whtRate,
+            disbursementChannel: channel,
+            remark
+          })
+        });
+        const data = await res.json();
+        const approval = data.approval;
+
+        document.getElementById('hitl-state-badge').className = 'spec-badge spec-badge-ok';
+        document.getElementById('hitl-state-badge').textContent = 'DISBURSEMENT_AUTHORIZED';
+        document.getElementById('btn-hitl-approve').disabled = true;
+        document.getElementById('btn-hitl-approve').textContent = 'Disbursement Approved';
+
+        document.getElementById('hitl-receipt-output').style.display = 'block';
+        document.getElementById('hitl-receipt-stamp').innerHTML = `
+          <strong>Auth Code:</strong> ${approval.authorizationStamp}<br>
+          <strong>Signed by:</strong> ${approval.approverName} (${approval.approverRole})<br>
+          <strong>Net Wire:</strong> ${approval.netPayableAmount.toLocaleString()}.00 THB via ${approval.disbursementChannel}
+        `;
+
+        document.getElementById('kpi-ap').textContent = '0.00 THB';
+        document.getElementById('kpi-ap').nextElementSibling.textContent = 'Queue Cleared';
+
+        addLog('HITL_PAYMENT_APPROVED', `Disbursement authorized for ${currentInvoice} by ${approval.approverName}. Auth Stamp: ${approval.authorizationStamp}`);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    async function rejectPaymentDisbursement() {
+      const reason = prompt('Specify rejection reason for vendor dispute:');
+      if (!reason) return;
+
+      try {
+        const res = await fetch('/api/v1/procurement/reject-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            invoiceNumber: currentInvoice,
+            reviewerId: 'EMP-CFO-01',
+            reason
+          })
+        });
+        document.getElementById('hitl-state-badge').className = 'spec-badge spec-badge-bad';
+        document.getElementById('hitl-state-badge').textContent = 'PAYMENT_REJECTED';
+        addLog('P2P_PAYMENT_REJECTED', `Invoice ${currentInvoice} rejected. Reason: ${reason}`);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    async function fetchETaxInvoices() {
+      try {
+        const res = await fetch('/api/v1/etax/invoices');
+        const data = await res.json();
+        const container = document.getElementById('etax-invoice-list');
+        container.innerHTML = '';
+
+        if (!data.invoices || data.invoices.length === 0) {
+          container.innerHTML = '<div style="color: var(--color-muted); font-size: 13px;">No e-Tax invoices found.</div>';
+          return;
+        }
+
+        data.invoices.forEach(inv => {
+          const item = document.createElement('div');
+          item.style.cssText = 'background: var(--color-paper-3); border: var(--rule-hair) solid var(--color-rule); border-radius: var(--radius-sm); padding: 10px; margin-bottom: 8px; cursor: pointer;';
+          item.onclick = () => selectInvoiceForInspection(inv);
+          item.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <code style="color: var(--color-ink); font-weight: 600;">${inv.invoiceNumber}</code>
+              <span class="spec-badge ${inv.status === 'ACKNOWLEDGED_RD' ? 'spec-badge-ok' : 'spec-badge-accent'}">${inv.status}</span>
+            </div>
+            <div style="font-size: 12px; color: var(--color-muted); margin-top: 4px;">
+              ${inv.documentType === 'T03' ? 'e-Tax Invoice (ใบกำกับภาษี)' : inv.documentType === '81' ? 'Credit Note (ใบลดหนี้)' : inv.documentType}
+              &bull; Seller: ${inv.seller.name}
+            </div>
+            <div style="display: flex; justify-content: space-between; font-family: var(--font-outlier); font-size: 11px; margin-top: 6px; color: var(--color-ink-2);">
+              <span>Grand Total: ${(inv.grandTotal).toLocaleString()} THB</span>
+              <span>ETDA v2.1 Sealed</span>
+            </div>
+          `;
+          container.appendChild(item);
+        });
+
+        if (data.invoices[0]) {
+          selectInvoiceForInspection(data.invoices[0]);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function selectInvoiceForInspection(inv) {
+      document.getElementById('sandbox-target-inv').textContent = inv.invoiceNumber;
+      if (inv.xmlPayload) {
+        document.getElementById('xml-inspection-view').textContent = inv.xmlPayload;
+      }
+    }
+
+    async function submitSelectedToSandbox() {
+      const invNum = document.getElementById('sandbox-target-inv').textContent;
+      try {
+        const res = await fetch('/api/v1/etax/sandbox/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ invoiceNumber: invNum })
+        });
+        const data = await res.json();
+        const resp = data.response;
+
+        const ackCard = document.getElementById('sandbox-ack-card');
+        ackCard.style.display = 'block';
+
+        const details = document.getElementById('sandbox-ack-details');
+        details.innerHTML = `
+          <div>&bull; <strong>Transaction ID   :</strong> ${resp.transactionId}</div>
+          <div>&bull; <strong>Status Code      :</strong> ${resp.statusCode} (${resp.statusDescription})</div>
+          <div>&bull; <strong>Schema Standard  :</strong> ${resp.etdaSchemaCompliance} (ETDA ER3-2560 v2.1)</div>
+          <div>&bull; <strong>RD Signature     :</strong> <span style="word-break: break-all;">${resp.rdSignature}</span></div>
+          <div>&bull; <strong>Receipt Verifier :</strong> <a href="${resp.testReceiptUrl}" target="_blank" style="color: var(--color-accent);">${resp.testReceiptUrl}</a></div>
+        `;
+
+        addLog('ETAX_SANDBOX_ACK', `RD Sandbox ACK-200 confirmed for ${invNum}. TxID: ${resp.transactionId}`);
+        fetchETaxInvoices();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    async function fetchGlVouchers() {
+      try {
+        const res = await fetch('/api/v1/accounting/vouchers');
+        const data = await res.json();
+        const tbody = document.getElementById('gl-voucher-rows');
+
+        if (data.vouchers && data.vouchers.length > 0) {
+          tbody.innerHTML = '';
+          data.vouchers.forEach(v => {
+            v.lineItems.forEach(line => {
+              const tr = document.createElement('tr');
+              tr.innerHTML = `
+                <td>${v.id}</td>
+                <td>${line.accountNumber} ${line.accountName}</td>
+                <td>${line.description}</td>
+                <td>${line.entryType === 'DEBIT' ? line.amountThb.toLocaleString() + '.00' : '-'}</td>
+                <td>${line.entryType === 'CREDIT' ? line.amountThb.toLocaleString() + '.00' : '-'}</td>
+                <td><span class="spec-badge spec-badge-ok">SEALED</span></td>
+              `;
+              tbody.appendChild(tr);
+            });
+          });
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
     async function fetchOrgChart() {
       try {
         const res = await fetch('/api/v1/workforce/agents');
@@ -369,18 +1044,15 @@
 
         data.agents.forEach(agent => {
           const card = document.createElement('div');
-          card.className = 'agent-card';
+          card.style.cssText = 'background: var(--color-paper-3); border: var(--rule-hair) solid var(--color-rule); border-radius: var(--radius-sm); padding: 10px; margin-bottom: 8px;';
           card.innerHTML = `
-            <div class="agent-header">
-              <span class="agent-name">🤖 ${agent.name}</span>
-              <span class="badge badge-blue">${agent.status}</span>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <code style="color: var(--color-ink); font-weight: 600;">${agent.name}</code>
+              <span class="spec-badge spec-badge-accent">${agent.status}</span>
             </div>
-            <div class="agent-meta">${agent.role} &bull; Dept: ${agent.departmentId} &bull; Engine: ${agent.modelEngine}</div>
-            <div class="skills-row">
-              ${agent.skills.map(s => `<span class="skill-tag">${s.name} (${s.proficiency}/10)</span>`).join('')}
-            </div>
-            <div style="font-size: 12px; color: var(--text-muted); display: flex; justify-content: space-between; margin-top: 4px;">
-              <span>Daily Budget: ${(agent.dailyTokenBudget / 1000).toLocaleString()}k tokens</span>
+            <div style="font-size: 12px; color: var(--color-muted); margin-top: 4px;">${agent.role} &bull; Engine: ${agent.modelEngine}</div>
+            <div style="display: flex; justify-content: space-between; font-family: var(--font-outlier); font-size: 11px; margin-top: 6px; color: var(--color-ink-2);">
+              <span>Daily Budget: ${(agent.dailyTokenBudget / 1000).toLocaleString()}k</span>
               <span>Financial Cap: ${(agent.spendingLimit).toLocaleString()} THB</span>
             </div>
           `;
@@ -389,54 +1061,6 @@
       } catch (e) {
         console.error(e);
       }
-    }
-
-    async function runP2pDemo() {
-      const output = document.getElementById('p2p-simulation-output');
-      output.innerHTML = `
-        <div class="match-box">
-          <div class="match-header">
-            <div>
-              <strong>Autonomous 3-Way Match Execution</strong>
-              <div style="font-size: 12px; color: var(--text-muted);">Reconciling PO-99201 vs GRN-8401 vs INV-2026-778</div>
-            </div>
-            <span class="match-status status-perfect">MATCH_PERFECT (100% ALIGNED)</span>
-          </div>
-          <div style="font-size: 13px; line-height: 1.6; margin-top: 10px;">
-            <div>&bull; <strong>Line Item 1:</strong> 2x Nvidia H200 SXM @ 1,600,000 THB &rarr; <span style="color: #34d399;">VERIFIED</span></div>
-            <div>&bull; <strong>Goods Inspection:</strong> 2 Received, 2 Accepted, 0 Rejected &rarr; <span style="color: #34d399;">PASSED</span></div>
-            <div>&bull; <strong>Tolerance Applied:</strong> 0.00% Variance (Strict Match) &rarr; <span style="color: #34d399;">PASSED</span></div>
-            <div>&bull; <strong>Auto-Payment Authorization:</strong> Dispatched to Corporate Treasury &rarr; <span style="color: #38bdf8;">AUTHORIZED</span></div>
-          </div>
-        </div>
-      `;
-      addLog('THREE_WAY_MATCH', 'Reconciled PO-99201, GRN-8401, INV-2026-778. Status: MATCH_PERFECT. Payment Authorized.');
-    }
-
-    async function mintDacDemo() {
-      const dacDiv = document.getElementById('dac-output');
-      const now = new Date().toLocaleTimeString();
-      dacDiv.innerHTML = `
-        <div class="agent-card">
-          <div class="agent-header">
-            <span class="agent-name">DAC-ORCA-PRIME-${Date.now().toString().slice(-4)}</span>
-            <span class="badge badge-green">MINTED & VERIFIED</span>
-          </div>
-          <div class="agent-meta">Issuer: Dr. Ake (CEO) &rarr; Delegatee: Orca Prime Orchestrator</div>
-          <div style="font-size: 12px; margin-top: 4px;">
-            <strong>Spending Cap:</strong> 5,000,000 THB | <strong>Algorithm:</strong> NIST FIPS 204 ML-DSA-65
-          </div>
-          <div style="font-size: 11px; color: #a78bfa; font-family: monospace; word-break: break-all; margin-top: 6px;">
-            Envelope Digest: c8b45920391d8... | Quantum Signature Valid
-          </div>
-        </div>
-      `;
-      addLog('DAC_MINTED', 'Minted NIST FIPS 204 ML-DSA-65 Credential for Orca Prime Orchestrator.');
-    }
-
-    async function testGuardrailBlock() {
-      addLog('EBPF_INTERCEPT', 'Agent attempt to access /etc/shadow intercepted by eBPF Guardrail &rarr; BLOCKED (CRITICAL)');
-      alert('🛡️ eBPF Guardrail Interceptor Alert:\nUnauthorized access attempt to sensitive system resource was intercepted and strictly BLOCKED.\nSeverity: CRITICAL');
     }
 
     function addLog(action, msg) {
@@ -448,8 +1072,12 @@
       logs.prepend(row);
     }
 
-    // Auto load on start
-    fetchOrgChart();
+    function clearTelemetryDisplay() {
+      document.getElementById('telemetry-logs').innerHTML = '';
+    }
+
+    // Auto initialize
+    fetchETaxInvoices();
   </script>
 </body>
 </html>

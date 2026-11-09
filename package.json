@@ -14,6 +14,7 @@
     "cli": "tsx src/presentation/cli/index.ts",
     "start": "tsx src/presentation/server/api-server.ts",
     "dev": "tsx src/presentation/server/api-server.ts",
+    "etax:validate": "tsx scripts/validate-etax-schema.ts",
     "lint": "tsc --noEmit"
   },
   "keywords": [

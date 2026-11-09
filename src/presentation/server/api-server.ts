@@ -153,6 +153,14 @@ export class ApiServer {
       return this.sendJson(res, 200, { orders: this.procurementService.listPurchaseOrders() });
     }
 
+    if (path === '/api/v1/procurement/invoices' && method === 'GET') {
+      return this.sendJson(res, 200, { invoices: this.procurementService.listInvoices() });
+    }
+
+    if (path === '/api/v1/procurement/match-results' && method === 'GET') {
+      return this.sendJson(res, 200, { results: this.procurementService.listMatchResults() });
+    }
+
     if (path === '/api/v1/procurement/requisitions' && method === 'POST') {
       const body = await this.parseJsonBody(req);
       const pr = this.procurementService.createPurchaseRequisition(body);
@@ -181,6 +189,54 @@ export class ApiServer {
       const body = (await this.parseJsonBody(req)) as { invoiceNumber: string };
       const result = this.procurementService.executeThreeWayMatch(body.invoiceNumber);
       return this.sendJson(res, 200, { result });
+    }
+
+    // Human-in-the-Loop Payment Approval
+    if (path === '/api/v1/procurement/approve-payment' && method === 'POST') {
+      const body = (await this.parseJsonBody(req)) as {
+        invoiceNumber: string;
+        approverId: string;
+        remark?: string;
+        whtRate?: number;
+        disbursementChannel?: string;
+      };
+      const approvalResult = this.procurementService.approvePaymentDisbursement(
+        body.invoiceNumber,
+        body.approverId,
+        body.remark,
+        body.whtRate,
+        body.disbursementChannel
+      );
+
+      // Automatically post balanced GL voucher
+      let voucher;
+      try {
+        const inv = approvalResult.invoice;
+        voucher = this.accountingService.postProcurementVoucher({
+          invoiceId: inv.invoiceNumber,
+          purchaseOrderId: inv.poNumber,
+          vendorId: inv.vendorId,
+          vendorName: 'DataDynamics Thailand Co., Ltd.',
+          baseAmountThb: inv.subtotal,
+          vatRatePercent: 7.0,
+          whtRatePercent: (approvalResult.approval.whtRate || 0.01) * 100,
+          description: `P2P HITL payment release for ${inv.invoiceNumber} (${approvalResult.approval.authorizationStamp})`
+        });
+      } catch {
+        // Continue if already posted
+      }
+
+      return this.sendJson(res, 200, {
+        invoice: approvalResult.invoice,
+        approval: approvalResult.approval,
+        voucher
+      });
+    }
+
+    if (path === '/api/v1/procurement/reject-payment' && method === 'POST') {
+      const body = (await this.parseJsonBody(req)) as { invoiceNumber: string; reviewerId: string; reason: string };
+      const invoice = this.procurementService.rejectPayment(body.invoiceNumber, body.reviewerId, body.reason);
+      return this.sendJson(res, 200, { invoice });
     }
 
     // Payroll & PND1 API (WOS-EPIC-10)
@@ -296,6 +352,10 @@ export class ApiServer {
     }
 
     // e-Tax Invoice & e-Receipt API (WOS-EPIC-07)
+    if (path === '/api/v1/etax/invoices' && method === 'GET') {
+      return this.sendJson(res, 200, { invoices: this.eTaxService.listInvoices() });
+    }
+
     if (path === '/api/v1/etax/invoices' && method === 'POST') {
       const body = await this.parseJsonBody(req);
       const invoice = this.eTaxService.generateAndSealInvoice(body as any);
@@ -309,6 +369,22 @@ export class ApiServer {
         return this.sendJson(res, 404, { error: 'NOT_FOUND', message: `e-Tax Invoice '${invNum}' not found.` });
       }
       return this.sendJson(res, 200, { invoice });
+    }
+
+    if (path === '/api/v1/etax/sandbox/submit' && method === 'POST') {
+      const body = (await this.parseJsonBody(req)) as { invoiceNumber: string };
+      const response = await this.eTaxService.submitToSandbox(body.invoiceNumber);
+      return this.sendJson(res, 200, { response });
+    }
+
+    if (path === '/api/v1/etax/validate-xml' && method === 'POST') {
+      const body = (await this.parseJsonBody(req)) as { xmlPayload: string };
+      const validation = this.eTaxService.validateRawXml(body.xmlPayload);
+      return this.sendJson(res, 200, { validation });
+    }
+
+    if (path === '/api/v1/etax/sandbox/logs' && method === 'GET') {
+      return this.sendJson(res, 200, { logs: this.eTaxService.getSandboxTransmissionLogs() });
     }
 
     // Vendor Risk & KYC API (WOS-EPIC-08)
@@ -336,57 +412,6 @@ export class ApiServer {
         body.signature
       );
       return this.sendJson(res, 200, { result });
-    }
-
-    // Payroll & PND1 API (WOS-EPIC-10)
-    if (path === '/api/v1/payroll/profile' && method === 'POST') {
-      const body = await this.parseJsonBody(req) as any;
-      this.payrollService.registerPayrollProfile(body);
-      return this.sendJson(res, 201, { message: 'Profile registered' });
-    }
-
-    if (path === '/api/v1/payroll/payslip' && method === 'POST') {
-      const body = await this.parseJsonBody(req) as any;
-      const payslip = this.payrollService.generateMonthlyPayslip(body.employeeId, body.year, body.month);
-      return this.sendJson(res, 201, { payslip });
-    }
-
-    if (path === '/api/v1/payroll/pnd1' && method === 'POST') {
-      const body = await this.parseJsonBody(req) as any;
-      const filing = this.payrollService.generatePnd1MonthlyFiling(body.year, body.month, body.employerTaxId, body.branch);
-      return this.sendJson(res, 201, { filing });
-    }
-
-    // FX Hedging API (WOS-EPIC-11)
-    if (path === '/api/v1/fx/exposure' && method === 'POST') {
-      const body = await this.parseJsonBody(req) as any;
-      const exposure = this.fxService.recordForeignExposure(body.poNumber, body.vendorId, body.currency, body.amount, body.dueDate);
-      return this.sendJson(res, 201, { exposure });
-    }
-
-    if (path === '/api/v1/fx/hedge' && method === 'POST') {
-      const body = await this.parseJsonBody(req) as any;
-      const contract = this.fxService.executeForwardHedge(body.exposureId, body.counterpartyBank, body.daysToMaturity);
-      return this.sendJson(res, 201, { contract });
-    }
-
-    // Agent ROI & Token Ledger API (WOS-EPIC-12)
-    if (path === '/api/v1/agent-roi/token' && method === 'POST') {
-      const body = await this.parseJsonBody(req) as any;
-      const event = this.roiService.logTokenUsage(body.agentId, body.taskId, body.modelEngine, body.inputTokens, body.outputTokens);
-      return this.sendJson(res, 201, { event });
-    }
-
-    if (path === '/api/v1/agent-roi/value' && method === 'POST') {
-      const body = await this.parseJsonBody(req) as any;
-      const event = this.roiService.logBusinessValue(body.agentId, body.taskId, body.category, body.valueTHB, body.evidenceRef);
-      return this.sendJson(res, 201, { event });
-    }
-
-    if (path.startsWith('/api/v1/agent-roi/scorecard/') && method === 'GET') {
-      const agentId = decodeURIComponent(path.replace('/api/v1/agent-roi/scorecard/', ''));
-      const scorecard = this.roiService.getAgentRoiScorecard(agentId);
-      return this.sendJson(res, 200, { scorecard });
     }
 
     // 404 Route Not Found
